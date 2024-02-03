@@ -7,6 +7,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
+using System.IO;
+
 
 namespace Photo_Tools
 {
@@ -42,25 +44,9 @@ namespace Photo_Tools
             }
         }
 
-        public bool DatabaseExists(string? DatabaseLocation) 
+        public bool DatabaseExists(string DatabaseLocation) 
         {
-            SqliteConnection setupConn = new SqliteConnection();
-            try
-            {
-                if (DatabaseLocation != null)
-                {
-                    setupConn = GetSqliteConnection(DatabaseLocation);
-                }
-                else
-                {
-                    setupConn = DBConnection;
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
+            SqliteConnection setupConn = DBConnection;
 
             using (setupConn)
             {
@@ -68,7 +54,7 @@ namespace Photo_Tools
                 {
                     setupConn.Open();
                     SqliteCommand setupCommand = setupConn.CreateCommand();
-                    setupCommand.CommandText = ($"SELECT * FROM sqlite_master"); //This will return false if the table exists but is empty
+                    setupCommand.CommandText = ($"SELECT * FROM SQLITE_MASTER where Type = 'table' and name = 'List'"); //This will return false if the table exists but is empty
                     SqliteDataReader dbExistsReader = setupCommand.ExecuteReader();
                     dbExistsReader.Read();
                     bool dbExists = dbExistsReader.HasRows;
