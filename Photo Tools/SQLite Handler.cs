@@ -36,7 +36,6 @@ namespace Photo_Tools
         public void CreateDB(string DatabaseLocation, string sqlScriptLocation)
         {
             using (DBConnection)
-            //using (SqliteConnection setupConn = new SqliteConnection("Data Source =" + DatabaseLocation))
             {
                 SqliteCommand RunScript = new SqliteCommand();
                 RunScript.Connection = DBConnection;
@@ -49,26 +48,7 @@ namespace Photo_Tools
 
         public bool DatabaseExists(string DatabaseLocation) 
         {
-            using (DBConnection)
-            {
-                try
-                {
-                    DBConnection.Open();
-                    SqliteCommand setupCommand = DBConnection.CreateCommand();
-                    setupCommand.CommandText = ($"SELECT * FROM sqlite_master WHERE type = 'table' AND name = 'PhotoList'"); //This will return false if the table exists but is empty
-                    SqliteDataReader dbExistsReader = setupCommand.ExecuteReader();
-                    dbExistsReader.Read();
-                    bool dbExists = dbExistsReader.HasRows;
-                    dbExistsReader.Close();
-                    return dbExists;
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-            }
-
+            return File.Exists(DatabaseLocation);
         }
 
  
