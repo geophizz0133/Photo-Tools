@@ -1,6 +1,7 @@
 ﻿using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using Microsoft.Data.Sqlite;
+using System.ComponentModel.Design;
 
 namespace Photo_Tools
 {
@@ -18,7 +19,7 @@ namespace Photo_Tools
             public Guid ID;
             public string FilePath;
             public string FileName;
-            public string DateCaptured;
+            public DateTime DateCaptured;
             public string CameraMake;
             public string FoclLength;
             public string fStop;
@@ -29,10 +30,10 @@ namespace Photo_Tools
         public PhotoData ReadPhoto(string PhotoFileLocation)
         {
             PhotoData photoData = new PhotoData();
-            //ImageMetadataReader photoReader = new ImageMetadataReader(PhotoFileLocation);
+
             var directories = ImageMetadataReader.ReadMetadata(PhotoFileLocation);
 
-            //Cycle thru all directories
+           //Cycle thru all directories
             foreach (var directory in directories)
             {
                 foreach (var tag in directory.Tags)
@@ -46,35 +47,42 @@ namespace Photo_Tools
             //Get a specific directory
             // obtain the Exif SubIFD directory
             Console.WriteLine(Environment.NewLine + "Starting single value read");
-            var directory2 = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
-            if (directory2 != null)
+            var directoryIFD = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+            if (directoryIFD != null)
             {
                 // query the tag's value
-                if (directory2.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
-                    //return dateTime;
-                    Console.WriteLine($"Date/Time Original = {dateTime.ToString()}");
+                if (directoryIFD.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
+                {
+                    photoData.DateCaptured = dateTime;
+                    Console.WriteLine($"Date/Time Original = {photoData.DateCaptured.ToString()}");
+                }
+               
 
+            
 
-
-            }
+            } 
 
             // obtain a specific directory
-            var directory3 = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+            var directoryIFD2 = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
 
-            if (directory3 != null)
+            if (directoryIFD2 != null) //Descriptors for not directly readable fields?
             {
                 // create a descriptor
-                var descriptor = new ExifSubIfdDescriptor(directory3);
+                var descriptor = new ExifSubIfdDescriptor(directoryIFD2);
 
                 // get tag description
-                String program = descriptor.GetExposureProgramDescription();
-                Console.WriteLine($"Exposure Program = {program}");
+                photoData.fStop = descriptor.GetFNumberDescription();
+                Console.WriteLine($"F-Stop = {photoData.fStop}");
 
-                program = descriptor.Get35MMFilmEquivFocalLengthDescription();
-                Console.WriteLine($"Focal Length = {program}");
+                photoData.FoclLength = descriptor.Get35MMFilmEquivFocalLengthDescription();
+                Console.WriteLine($"Focal Length = {photoData.FoclLength}");
 
-                program = descriptor.GetExposureTimeDescription();
-                Console.WriteLine($"Shutter Speed = {program}");
+                photoData.ShutterSpeed = descriptor.GetExposureTimeDescription();
+                Console.WriteLine($"Shutter Speed = {photoData.ShutterSpeed}");
+
+                var directoryIFD0 = directories.OfType<ExifIfd0Directory>().FirstOrDefault();
+                photoData.CameraMake = directoryIFD0.GetDescription(ExifIfd0Directory.TagMake);
+                Console.WriteLine($"Camera Make = {photoData.CameraMake.ToString()}");
             }
 
             return photoData;
