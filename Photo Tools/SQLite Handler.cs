@@ -35,40 +35,26 @@ namespace Photo_Tools
 
         public void CreateDB(string DatabaseLocation, string sqlScriptLocation)
         {
-            using (SqliteConnection setupConn = new SqliteConnection("Data Source =" + DatabaseLocation))
+            using (DBConnection)
+            //using (SqliteConnection setupConn = new SqliteConnection("Data Source =" + DatabaseLocation))
             {
-                /*SqliteCommand setupDBCommand = new SqliteCommand("Create Table MEMBER(TIME datetime, APPLICATION Varchar(20), USER Varchar(30), EVENT varchar (500))");
-                setupConn.Open();
-                setupDBCommand.Connection = setupConn;
-                setupDBCommand.ExecuteNonQuery();
-                */
-
                 SqliteCommand RunScript = new SqliteCommand();
-                RunScript.Connection = setupConn;
+                RunScript.Connection = DBConnection;
                 RunScript.CommandText = File.ReadAllText(sqlScriptLocation);
-                setupConn.Open();
+                DBConnection.Open();
                 RunScript.ExecuteNonQuery();
-                setupConn.Close();
-
-
-                /*
-                 * sqlite_cmd.CommandText = File.ReadAllText(sqlPath)
-                sqlite_cmd.ExecuteNonQuery()
-                 * 
-                 */
+                DBConnection.Close();
             }
         }
 
         public bool DatabaseExists(string DatabaseLocation) 
         {
-            SqliteConnection setupConn = DBConnection;
-
-            using (setupConn)
+            using (DBConnection)
             {
                 try
                 {
-                    setupConn.Open();
-                    SqliteCommand setupCommand = setupConn.CreateCommand();
+                    DBConnection.Open();
+                    SqliteCommand setupCommand = DBConnection.CreateCommand();
                     setupCommand.CommandText = ($"SELECT * FROM sqlite_master WHERE type = 'table' AND name = 'PhotoList'"); //This will return false if the table exists but is empty
                     SqliteDataReader dbExistsReader = setupCommand.ExecuteReader();
                     dbExistsReader.Read();
