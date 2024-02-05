@@ -33,14 +33,29 @@ namespace Photo_Tools
             }
         }
 
-        public void CreateDB(string DatabaseLocation, string sqlScript)
+        public void CreateDB(string DatabaseLocation, string sqlScriptLocation)
         {
             using (SqliteConnection setupConn = new SqliteConnection("Data Source =" + DatabaseLocation))
             {
-                SqliteCommand setupDBCommand = new SqliteCommand("Create Table MEMBER(TIME datetime, APPLICATION Varchar(20), USER Varchar(30), EVENT varchar (500))");
+                /*SqliteCommand setupDBCommand = new SqliteCommand("Create Table MEMBER(TIME datetime, APPLICATION Varchar(20), USER Varchar(30), EVENT varchar (500))");
                 setupConn.Open();
                 setupDBCommand.Connection = setupConn;
                 setupDBCommand.ExecuteNonQuery();
+                */
+
+                SqliteCommand RunScript = new SqliteCommand();
+                RunScript.Connection = setupConn;
+                RunScript.CommandText = File.ReadAllText(sqlScriptLocation);
+                setupConn.Open();
+                RunScript.ExecuteNonQuery();
+                setupConn.Close();
+
+
+                /*
+                 * sqlite_cmd.CommandText = File.ReadAllText(sqlPath)
+                sqlite_cmd.ExecuteNonQuery()
+                 * 
+                 */
             }
         }
 
@@ -54,7 +69,7 @@ namespace Photo_Tools
                 {
                     setupConn.Open();
                     SqliteCommand setupCommand = setupConn.CreateCommand();
-                    setupCommand.CommandText = ($"SELECT * FROM SQLITE_MASTER where Type = 'table' and name = 'List'"); //This will return false if the table exists but is empty
+                    setupCommand.CommandText = ($"SELECT * FROM sqlite_master WHERE type = 'table' AND name = 'PhotoList'"); //This will return false if the table exists but is empty
                     SqliteDataReader dbExistsReader = setupCommand.ExecuteReader();
                     dbExistsReader.Read();
                     bool dbExists = dbExistsReader.HasRows;
