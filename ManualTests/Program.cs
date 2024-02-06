@@ -1,4 +1,5 @@
 ﻿using Photo_Tools;
+using System.Collections.Generic;
 
 Console.WriteLine("Starting Tests");
 
@@ -11,11 +12,39 @@ try
     //read data from photo files
     MetadataHandler metadataHandler = new MetadataHandler();
     
-    metadataHandler.ReadPhoto($"D:/Scratch/2023-01-065 (DSC05176).JPG");
-    metadataHandler.ReadPhoto($"D:/Scratch/2023-01-065 (DSC05176).ARW");
-    metadataHandler.ReadPhoto($"D:/Scratch/2023-01-078 (IMG_8946).CR3");
-    metadataHandler.ReadPhoto($"D:/Scratch/2024-01-055 (IMG_7297).DNG");
+    List<PhotoData> photoData = new List<PhotoData>();
 
+    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2015/2015-12");
+    Console.WriteLine("No search pattern returns:");
+    foreach (var filename in FileFolder.EnumerateFiles())
+    {
+        try
+        {
+           // Console.WriteLine(filename.FullName);
+            string filePath = filename.FullName.ToString();
+            photoData.Add(metadataHandler.ReadPhoto(filePath));
+        }
+        catch (Exception)
+        {
+            Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
+
+           // throw;
+        }
+    }
+
+    foreach(PhotoData p in photoData)
+    {
+        Console.WriteLine(Environment.NewLine);
+        Console.WriteLine($"File Name: {p.FileName}");
+        Console.WriteLine($"Path: {p.FilePath}");
+        Console.WriteLine($"File Type: {p.Extension}");
+        Console.WriteLine($"Camera Make: {p.CameraMake}");
+        Console.WriteLine($"Date/Time Captured: {p.DateCaptured}");
+        Console.WriteLine($"F-Stop: {p.fStop}");
+        Console.WriteLine($"Shutter Speed: {p.ShutterSpeed}");
+        Console.WriteLine($"Focal Length: {p.FoclLength}");
+        Console.WriteLine($"Software: {p.Software}");
+    }
 
     Console.WriteLine($"Press any key to quit");Console.Read();
 }
