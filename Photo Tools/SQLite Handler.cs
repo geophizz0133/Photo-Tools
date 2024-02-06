@@ -51,8 +51,22 @@ namespace Photo_Tools
             return File.Exists(DatabaseLocation);
         }
 
- 
+        public void InsertPhotoList(PhotoData photoData) 
+        { 
+            //Insert a List of PhotoData objects into the database
 
+        }
+        public List<PhotoData> GetDuplicateList() 
+        {   //run SQLite Script to get dulicates
+            //return a list of duplicates in the form of a PhotoData List
+            return new List<PhotoData>(); 
+        }
+
+        public void ExtractDuplicates(List<PhotoData> list, string FolderLocation)
+        {
+            //Take the list of duplicates and move them to a duplicates folder structure
+
+        }
 
     }
 }

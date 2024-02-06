@@ -14,7 +14,7 @@ try
     
     List<PhotoData> photoData = new List<PhotoData>();
 
-    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2015/2015-12");
+    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/1920's");
     Console.WriteLine("No search pattern returns:");
     foreach (var filename in FileFolder.EnumerateFiles())
     {
@@ -27,8 +27,6 @@ try
         catch (Exception)
         {
             Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
-
-           // throw;
         }
     }
 
