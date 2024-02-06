@@ -10,8 +10,11 @@ try
 
     //read data from photo files
     MetadataHandler metadataHandler = new MetadataHandler();
+    
     metadataHandler.ReadPhoto($"D:/Scratch/2023-01-065 (DSC05176).JPG");
-
+    metadataHandler.ReadPhoto($"D:/Scratch/2023-01-065 (DSC05176).ARW");
+    metadataHandler.ReadPhoto($"D:/Scratch/2023-01-078 (IMG_8946).CR3");
+    metadataHandler.ReadPhoto($"D:/Scratch/2024-01-055 (IMG_7297).DNG");
 
 
     Console.WriteLine($"Press any key to quit");Console.Read();

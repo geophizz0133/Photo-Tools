@@ -2,6 +2,9 @@
 using MetadataExtractor.Formats.Exif;
 using Microsoft.Data.Sqlite;
 using System.ComponentModel.Design;
+using System.Security.Cryptography.X509Certificates;
+using System.Xml;
+using System.IO;
 
 namespace Photo_Tools
 {
@@ -19,71 +22,88 @@ namespace Photo_Tools
             public Guid ID;
             public string FilePath;
             public string FileName;
-            public DateTime DateCaptured;
+            public string Extension;
+            public string DateCaptured;
             public string CameraMake;
+            public string CameraModel;
             public string FoclLength;
             public string fStop;
             public string ShutterSpeed;
+            public string Software;
 
         }
 
         public PhotoData ReadPhoto(string PhotoFileLocation)
         {
             PhotoData photoData = new PhotoData();
+           
+            FileInfo fileInfo = new FileInfo(PhotoFileLocation);
+            photoData.FilePath = PhotoFileLocation;
+            photoData.FileName = fileInfo.Name;
+            photoData.Extension = fileInfo.Extension;
 
             var directories = ImageMetadataReader.ReadMetadata(PhotoFileLocation);
 
-           //Cycle thru all directories
+            string tempFStop = String.Empty;
+            
+            Console.WriteLine(Environment.NewLine);
+
+
+            photoData.FilePath = PhotoFileLocation;
+            // photoData.FileName = FileInfo(PhotoFileLocation).Name;
+
+            //Cycle thru all directories
             foreach (var directory in directories)
             {
                 foreach (var tag in directory.Tags)
                 {
-                    Console.WriteLine(tag.ToString());
-                    //photoData.CameraMake = ExifSubIfdDirectory.TagMake.ToString();
+                   // Console.WriteLine($"{ tag.ToString()}");
+
+
+
+                    switch(tag.Name) 
+                    {
+                        case "Make":
+                            photoData.CameraMake = tag.Description;
+                            break;
+                        case "F-Number":
+                            photoData.fStop = tag.Description;
+                            break;
+                        case "Model":
+                            photoData.CameraModel = tag.Description;
+                            break;
+                        case "Focal Length":
+                            photoData.FoclLength = tag.Description;
+                            break;
+                        case "Date/Time Digitized":
+                        case "Date/Time Original":  //this needs more handling
+                            photoData.DateCaptured = tag.Description;
+                            break;
+                        case "Exposure Time":
+                            photoData.ShutterSpeed = tag.Description;
+                            break;
+                        case "Software":
+                            photoData.Software = tag.Description;
+                            break;
+                        default:
+                            break;
+                    
+                    }
 
                 }
             }
 
-            //Get a specific directory
-            // obtain the Exif SubIFD directory
-            Console.WriteLine(Environment.NewLine + "Starting single value read");
-            var directoryIFD = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
-            if (directoryIFD != null)
-            {
-                // query the tag's value
-                if (directoryIFD.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTime))
-                {
-                    photoData.DateCaptured = dateTime;
-                    Console.WriteLine($"Date/Time Original = {photoData.DateCaptured.ToString()}");
-                }
-               
+   
 
-            
-
-            } 
-
-            // obtain a specific directory
-            var directoryIFD2 = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
-
-            if (directoryIFD2 != null) //Descriptors for not directly readable fields?
-            {
-                // create a descriptor
-                var descriptor = new ExifSubIfdDescriptor(directoryIFD2);
-
-                // get tag description
-                photoData.fStop = descriptor.GetFNumberDescription();
-                Console.WriteLine($"F-Stop = {photoData.fStop}");
-
-                photoData.FoclLength = descriptor.Get35MMFilmEquivFocalLengthDescription();
-                Console.WriteLine($"Focal Length = {photoData.FoclLength}");
-
-                photoData.ShutterSpeed = descriptor.GetExposureTimeDescription();
-                Console.WriteLine($"Shutter Speed = {photoData.ShutterSpeed}");
-
-                var directoryIFD0 = directories.OfType<ExifIfd0Directory>().FirstOrDefault();
-                photoData.CameraMake = directoryIFD0.GetDescription(ExifIfd0Directory.TagMake);
-                Console.WriteLine($"Camera Make = {photoData.CameraMake.ToString()}");
-            }
+            Console.WriteLine($"File Name: {photoData.FileName}");
+            Console.WriteLine($"Path: {photoData.FilePath}");
+            Console.WriteLine($"File Type: {photoData.Extension}");
+            Console.WriteLine($"Camera Make: {photoData.CameraMake}");
+            Console.WriteLine($"Date/Time Captured: {photoData.DateCaptured}");
+            Console.WriteLine($"F-Stop: {photoData.fStop}");
+            Console.WriteLine($"Shutter Speed: {photoData.ShutterSpeed}");
+            Console.WriteLine($"Focal Length: {photoData.FoclLength}");
+            Console.WriteLine($"Software: {photoData.Software}");
 
             return photoData;
         }
