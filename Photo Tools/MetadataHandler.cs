@@ -5,6 +5,7 @@ using System.ComponentModel.Design;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Photo_Tools
 {
@@ -22,6 +23,7 @@ namespace Photo_Tools
             PhotoData photoData = new PhotoData();
            
             FileInfo fileInfo = new FileInfo(PhotoFileLocation);
+            photoData.ID = new UniqueId().ToString();
             photoData.FilePath = PhotoFileLocation;
             photoData.FileName = fileInfo.Name;
             photoData.Extension = fileInfo.Extension;
@@ -39,11 +41,11 @@ namespace Photo_Tools
                         case "Make":
                             photoData.CameraMake = tag.Description;
                             break;
-                        case "F-Number":
-                            photoData.fStop = tag.Description;
-                            break;
                         case "Model":
                             photoData.CameraModel = tag.Description;
+                            break;
+                        case "F-Number":
+                            photoData.fStop = tag.Description;
                             break;
                         case "Focal Length":
                             photoData.FoclLength = tag.Description;

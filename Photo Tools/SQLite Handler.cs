@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using System.IO;
+using System.Xml;
+using System.Diagnostics;
 
 
 namespace Photo_Tools
@@ -51,11 +53,36 @@ namespace Photo_Tools
             return File.Exists(DatabaseLocation);
         }
 
-        public void InsertPhotoList(PhotoData photoData) 
+        public void InsertSinglePhoto(PhotoData photoData) 
         { 
-            //Insert a List of PhotoData objects into the database
+            //Insert a single PhotoData object into the database
+            using (DBConnection) 
+            { 
+            SqliteCommand InsertCommand = new SqliteCommand();
+                try
+                {
+                    InsertCommand.Connection = DBConnection;
+                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.FoclLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\")");
+                    Debug.Print(InsertCommand.CommandText);
+                    
+                    DBConnection.Open();
+                    InsertCommand.ExecuteNonQuery();
+                    DBConnection.Close();
+                }
+                catch (Exception)
+                {
 
+                    throw;
+                }
+            }
         }
+
+        public void InsertPhotoList(List<PhotoData> photoData) 
+        { 
+            //Insert a list of photodata objcts
+        }
+        
+        
         public List<PhotoData> GetDuplicateList() 
         {   //run SQLite Script to get dulicates
             //return a list of duplicates in the form of a PhotoData List

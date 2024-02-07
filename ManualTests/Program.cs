@@ -14,15 +14,15 @@ try
     
     List<PhotoData> photoData = new List<PhotoData>();
 
-    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/1920's");
-    Console.WriteLine("No search pattern returns:");
+    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2011/2011-04");
+    Console.WriteLine("Starting folder scan:");
     foreach (var filename in FileFolder.EnumerateFiles())
     {
         try
         {
-           // Console.WriteLine(filename.FullName);
             string filePath = filename.FullName.ToString();
             photoData.Add(metadataHandler.ReadPhoto(filePath));
+            
         }
         catch (Exception)
         {
@@ -32,8 +32,19 @@ try
 
     foreach(PhotoData p in photoData)
     {
-        Console.WriteLine(Environment.NewLine);
-        Console.WriteLine($"File Name: {p.FileName}");
+
+        try
+        {
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine($"File Name: {p.FileName}");
+            dbTester.InsertSinglePhoto(p);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+
         Console.WriteLine($"Path: {p.FilePath}");
         Console.WriteLine($"File Type: {p.Extension}");
         Console.WriteLine($"Camera Make: {p.CameraMake}");

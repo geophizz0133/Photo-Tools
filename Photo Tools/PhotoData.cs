@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Photo_Tools
 {
     public class PhotoData
     {
-        public Guid ID;
+        public string ID = String.Empty;
         public string FilePath = String.Empty;
         public string FileName = String.Empty;
         public string Extension = String.Empty;
