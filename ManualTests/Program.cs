@@ -1,5 +1,6 @@
 ﻿using Photo_Tools;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 Console.WriteLine("Starting Tests");
 
@@ -14,14 +15,18 @@ try
     
     List<PhotoData> photoData = new List<PhotoData>();
 
-    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2011/2011-04");
+    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2011/2011-12");
     Console.WriteLine("Starting folder scan:");
     foreach (var filename in FileFolder.EnumerateFiles())
     {
         try
         {
             string filePath = filename.FullName.ToString();
-            photoData.Add(metadataHandler.ReadPhoto(filePath));
+            Debug.Print($"Reading {filePath}"); 
+            PhotoData photo = metadataHandler.ReadPhoto(filePath);
+            dbTester.InsertSinglePhoto(photo);
+            photoData.Add(photo);
+            //photoData.Add(metadataHandler.ReadPhoto(filePath));
             
         }
         catch (Exception)
@@ -53,6 +58,7 @@ try
         Console.WriteLine($"Shutter Speed: {p.ShutterSpeed}");
         Console.WriteLine($"Focal Length: {p.FoclLength}");
         Console.WriteLine($"Software: {p.Software}");
+        Console.WriteLine($"Reduced Resolution = {p.ReducedResolution.ToString()}");
     }
 
     Console.WriteLine($"Press any key to quit");Console.Read();

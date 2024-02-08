@@ -64,10 +64,18 @@ namespace Photo_Tools
                     InsertCommand.Connection = DBConnection;
                     InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.FoclLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\")");
                     Debug.Print(InsertCommand.CommandText);
-                    
-                    DBConnection.Open();
-                    InsertCommand.ExecuteNonQuery();
-                    DBConnection.Close();
+
+                    try
+                    {
+                        DBConnection.Open();
+                        InsertCommand.ExecuteNonQuery();
+                        DBConnection.Close();
+                    }
+                    catch (Exception)
+                    {
+
+                        Debug.Print($"Database Insert Failed for {InsertCommand.CommandText}");
+                    }
                 }
                 catch (Exception)
                 {

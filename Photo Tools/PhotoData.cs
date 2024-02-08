@@ -20,6 +20,7 @@ namespace Photo_Tools
         public string fStop = String.Empty;
         public string ShutterSpeed = String.Empty;
         public string Software = String.Empty;
+        public bool ReducedResolution = false;
 
     }
 }

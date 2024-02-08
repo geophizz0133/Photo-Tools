@@ -32,10 +32,15 @@ namespace Photo_Tools
 
             //Cycle thru all directories
             foreach (var directory in directories)
-            {
+            { 
                 foreach (var tag in directory.Tags)
                 {
-
+                    switch (tag.Description) 
+                    {
+                        case "Reduced-Resolution Image":
+                            photoData.ReducedResolution = true;
+                            break;
+                    }
                     switch(tag.Name) 
                     {
                         case "Make":
