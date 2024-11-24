@@ -15,7 +15,7 @@ try
     
     List<PhotoData> photoData = new List<PhotoData>();
 
-    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2011/2011-12");
+    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2014/2014-12");
     Console.WriteLine("Starting folder scan:");
     foreach (var filename in FileFolder.EnumerateFiles())
     {
@@ -53,12 +53,15 @@ try
         Console.WriteLine($"Path: {p.FilePath}");
         Console.WriteLine($"File Type: {p.Extension}");
         Console.WriteLine($"Camera Make: {p.CameraMake}");
+        Console.WriteLine($"Camera Model: {p.CameraModel}");
         Console.WriteLine($"Date/Time Captured: {p.DateCaptured}");
         Console.WriteLine($"F-Stop: {p.fStop}");
         Console.WriteLine($"Shutter Speed: {p.ShutterSpeed}");
-        Console.WriteLine($"Focal Length: {p.FoclLength}");
+        Console.WriteLine($"Focal Length: {p.FocalLength}");
         Console.WriteLine($"Software: {p.Software}");
         Console.WriteLine($"Reduced Resolution = {p.ReducedResolution.ToString()}");
+        Console.WriteLine($"File Size: {p.FileSize.ToString()}");
+
     }
 
     Console.WriteLine($"Press any key to quit");Console.Read();

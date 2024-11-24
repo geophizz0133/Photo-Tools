@@ -16,11 +16,17 @@ namespace Photo_Tools
         public string DateCaptured = String.Empty;
         public string CameraMake = String.Empty;
         public string CameraModel = String.Empty;
-        public string FoclLength = String.Empty;
+        public string FocalLength = String.Empty;
         public string fStop = String.Empty;
         public string ShutterSpeed = String.Empty;
         public string Software = String.Empty;
         public bool ReducedResolution = false;
+        public string FileSize = String.Empty;
+        public string ImageHeight = String.Empty;
+        public string ImageWidth = String.Empty;
+        public string FullImageSize = String.Empty;
+        public string DateLastModified = String.Empty;
+
 
     }
 }
