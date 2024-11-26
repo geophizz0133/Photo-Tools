@@ -21,14 +21,22 @@ namespace Photo_Tools
 
         public SQLite_Handler(string dbLocation, string SQLscript)
         {
-            DBConnection = GetSqliteConnection(dbLocation);
-            if (!DatabaseExists(dbLocation))
+            try
             {
-                CreateDB(dbLocation, SQLscript);
+                DBConnection = GetSqliteConnection(dbLocation);
+                if (!DatabaseExists(dbLocation))
+                {
+                    CreateDB(dbLocation, SQLscript);
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
 
-        public SqliteConnection GetSqliteConnection(string DBLocation)
+        public SqliteConnection GetSqliteConnection(string DBLocation) //I don't think this is used
         {
             SqliteConnection dbConn = new SqliteConnection("Data Source =" + DBLocation);
             {
@@ -36,22 +44,37 @@ namespace Photo_Tools
             }
         }
 
-        public void CreateDB(string DatabaseLocation, string sqlScriptLocation)
-        {
-            using (DBConnection)
-            {
-                SqliteCommand RunScript = new SqliteCommand();
-                RunScript.Connection = DBConnection;
-                RunScript.CommandText = File.ReadAllText(sqlScriptLocation);
-                DBConnection.Open();
-                RunScript.ExecuteNonQuery();
-                DBConnection.Close();
-            }
-        }
-
         public bool DatabaseExists(string DatabaseLocation)
         {
-            return File.Exists(DatabaseLocation);
+            try
+            {
+                return File.Exists(DatabaseLocation);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public void CreateDB(string DatabaseLocation, string sqlScriptLocation)
+        {
+            try
+            {
+                using (DBConnection)
+                {
+                    SqliteCommand RunScript = new SqliteCommand();
+                    RunScript.Connection = DBConnection;
+                    RunScript.CommandText = File.ReadAllText(sqlScriptLocation);
+                    DBConnection.Open();
+                    RunScript.ExecuteNonQuery();
+                    DBConnection.Close();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         public void InsertSinglePhoto(PhotoData photoData)
@@ -86,19 +109,39 @@ namespace Photo_Tools
             }
         }
 
-        public void InsertPhotoList(List<PhotoData> photoData)
-        {
-            //Insert a list of photodata objcts
-        }
-
 
         public List<PhotoData> GetDuplicateList(string FilePrefix)
         {   //run SQLite Script to get dulicates
             //return a list of duplicates in the form of a PhotoData List
-          
-            List<PhotoData> SQLResults = RunSQLGetPhotoCommand($"Select * from PhotoList Where [FILE_PREFIX] = '{FilePrefix}'");
-            return SQLResults; ;
-            
+
+            try
+            {
+                List<PhotoData> SQLResults = RunSQLGetPhotoCommand($"Select * from PhotoList Where [FILE_PREFIX] = '{FilePrefix}'");
+                return SQLResults; ;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public DbDataReader GetReader(string SQLCommand)
+        {
+            //I need to figure out how to make this a disconnected recordset - otherwise it won't work without all the SQLite tools installed everywhere it is used
+            try
+            {
+                using (SqliteCommand command = new SqliteCommand(SQLCommand, DBConnection))
+                {
+                    DBConnection.Open();
+                    return command.ExecuteReader();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         public List<PhotoData> RunSQLGetPhotoCommand(string SQLcommand)
@@ -115,23 +158,30 @@ namespace Photo_Tools
                 {
                     PhotoData duplicatePhoto = new PhotoData();
 
-                  
-                    while(reader.Read())
 
+                    try
                     {
-                        duplicatePhoto.ID = reader.GetString(reader.GetOrdinal("ID")); 
-                        duplicatePhoto.FileName = reader.GetString(reader.GetOrdinal("FILE_PATH"));
-                        duplicatePhoto.DateCaptured = reader.GetString(reader.GetOrdinal("EXIF_DATE_CAPTURED"));
-                        duplicatePhoto.Software = reader.GetString(reader.GetOrdinal("EXIF_SOFTWARE"));
-                        duplicatePhoto.ImageWidth=reader.GetString(reader.GetOrdinal("EXIF_WIDTH"));
-                        duplicatePhoto.ImageHeight = reader.GetString(reader.GetOrdinal("EXIF_HEIGHT"));
-                        duplicatePhoto.CameraMake = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MAKE"));
-                        duplicatePhoto.CameraModel = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MODEL"));
-                        
-                        duplicateList.Add(duplicatePhoto);
-                       
+                        while (reader.Read())
+
+                        {
+                            duplicatePhoto.ID = reader.GetString(reader.GetOrdinal("ID"));
+                            duplicatePhoto.FileName = reader.GetString(reader.GetOrdinal("FILE_PATH"));
+                            duplicatePhoto.DateCaptured = reader.GetString(reader.GetOrdinal("EXIF_DATE_CAPTURED"));
+                            duplicatePhoto.Software = reader.GetString(reader.GetOrdinal("EXIF_SOFTWARE"));
+                            duplicatePhoto.ImageWidth = reader.GetString(reader.GetOrdinal("EXIF_WIDTH"));
+                            duplicatePhoto.ImageHeight = reader.GetString(reader.GetOrdinal("EXIF_HEIGHT"));
+                            duplicatePhoto.CameraMake = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MAKE"));
+                            duplicatePhoto.CameraModel = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MODEL"));
+
+                            duplicateList.Add(duplicatePhoto);
+
+                        }
                     }
-                   
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
                 }
             }
             return duplicateList;
@@ -179,11 +229,19 @@ namespace Photo_Tools
         }
 
         public void UpdateLowHangingFruit() 
-        { 
-            RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
-            RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL' where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
-            RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE' Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND [PHOTO_STATUS] is null");
-            RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION' Where INSTR([FILE_PATH],'Version')>0");
+        {
+            try
+            {
+                RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL' where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE' Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND [PHOTO_STATUS] is null");
+                RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION' Where INSTR([FILE_PATH],'Version')>0");
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
            
         }
     }

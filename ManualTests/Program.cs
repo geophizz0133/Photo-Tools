@@ -1,6 +1,7 @@
 ﻿using Photo_Tools;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Data.Sqlite;
 
 Console.WriteLine("Starting Tests");
 
@@ -10,6 +11,10 @@ try
 //Establish database connection or create the DB if it doesn't exist
 	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/CREATE TABLE PhotoList .txt");
 	Console.WriteLine("Connecting with specific location and SQL Code - Works");
+
+    //Clear the PhotoList table
+    Console.WriteLine("Clearing the database");
+    dbTester.RunSQLCommand("delete from PhotoList");
 
     //read data from photo files
     MetadataHandler metadataHandler = new MetadataHandler();
@@ -41,35 +46,7 @@ try
             
     }
     Console.Clear();
-    /*  foreach(PhotoData p in photoData)
-      {
-
-          try
-          {
-              Console.WriteLine(Environment.NewLine);
-              Console.WriteLine($"File Name: {p.FileName}");
-              dbTester.InsertSinglePhoto(p);
-          }
-          catch (Exception)
-          {
-
-              throw;
-          }
-
-          Console.WriteLine($"Path: {p.FilePath}");
-          Console.WriteLine($"File Type: {p.Extension}");
-          Console.WriteLine($"Camera Make: {p.CameraMake}");
-          Console.WriteLine($"Camera Model: {p.CameraModel}");
-          Console.WriteLine($"Date/Time Captured: {p.DateCaptured}");
-          Console.WriteLine($"F-Stop: {p.fStop}");
-          Console.WriteLine($"Shutter Speed: {p.ShutterSpeed}");
-          Console.WriteLine($"Focal Length: {p.FocalLength}");
-          Console.WriteLine($"Software: {p.Software}");
-          Console.WriteLine($"Reduced Resolution = {p.ReducedResolution.ToString()}");
-          Console.WriteLine($"File Size: {p.FileSize.ToString()}");
-
-      }
-    */
+  
 
     //Update the file prefix field in the DB (It is faster than doing it in c#)
     Console.WriteLine("Updating Low Hanging Fruit");
@@ -77,7 +54,7 @@ try
 
     Console.WriteLine("Retrieving Originals");
     List<PhotoData> Originals = dbTester.RunSQLGetPhotoCommand("SELECT * from PhotoList where [PHOTO_STATUS]='ORIGINAL'");
-    foreach (var photo in Originals)
+    foreach (PhotoData photo in Originals)
     {
         Console.WriteLine();
         Console.WriteLine(photo.ID);
