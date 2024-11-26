@@ -110,43 +110,23 @@ namespace Photo_Tools
         }
 
 
-        public List<PhotoData> GetDuplicateList(string FilePrefix)
+        public List<PhotoData> GetAllRelatedPhotos(string FilePrefix)
         {   //run SQLite Script to get dulicates
             //return a list of duplicates in the form of a PhotoData List
 
             try
             {
-                List<PhotoData> SQLResults = RunSQLGetPhotoCommand($"Select * from PhotoList Where [FILE_PREFIX] = '{FilePrefix}'");
-                return SQLResults; ;
+                List<PhotoData> duplicateList = GetListofPhotosFromDB($"Select * from PhotoList Where [FILE_PREFIX] = '{FilePrefix}' AND [PHOTO_STATUS]<>'ORIGINAL'");
+                return duplicateList; ;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
 
-        public DbDataReader GetReader(string SQLCommand)
+        public List<PhotoData> GetListofPhotosFromDB(string SQLcommand)
         {
-            //I need to figure out how to make this a disconnected recordset - otherwise it won't work without all the SQLite tools installed everywhere it is used
-            try
-            {
-                using (SqliteCommand command = new SqliteCommand(SQLCommand, DBConnection))
-                {
-                    DBConnection.Open();
-                    return command.ExecuteReader();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-
-        public List<PhotoData> RunSQLGetPhotoCommand(string SQLcommand)
-        {
-            //Should this return a data reader instead of a photoData list, so other routines do the cycling thru?
             List<PhotoData> duplicateList = new List<PhotoData>();
 
             using (SqliteCommand command = new SqliteCommand(SQLcommand, DBConnection))

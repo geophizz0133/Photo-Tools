@@ -53,7 +53,7 @@ try
     dbTester.UpdateLowHangingFruit();
 
     Console.WriteLine("Retrieving Originals");
-    List<PhotoData> Originals = dbTester.RunSQLGetPhotoCommand("SELECT * from PhotoList where [PHOTO_STATUS]='ORIGINAL'");
+    List<PhotoData> Originals = dbTester.GetListofPhotosFromDB("SELECT * from PhotoList where [PHOTO_STATUS]='ORIGINAL'");
     foreach (PhotoData photo in Originals)
     {
         Console.WriteLine();
