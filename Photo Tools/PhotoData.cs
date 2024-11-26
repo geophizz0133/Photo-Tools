@@ -26,7 +26,8 @@ namespace Photo_Tools
         public string ImageWidth = String.Empty;
         public string FullImageSize = String.Empty;
         public string DateLastModified = String.Empty;
-
+        public string PhotoStatus = String.Empty;
+        
 
     }
 }

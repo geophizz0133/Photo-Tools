@@ -10,6 +10,7 @@ using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
+using System.Collections;
 
 
 namespace Photo_Tools
@@ -23,7 +24,7 @@ namespace Photo_Tools
             DBConnection = GetSqliteConnection(dbLocation);
             if (!DatabaseExists(dbLocation))
             {
-                CreateDB(dbLocation,SQLscript);
+                CreateDB(dbLocation, SQLscript);
             }
         }
 
@@ -48,21 +49,21 @@ namespace Photo_Tools
             }
         }
 
-        public bool DatabaseExists(string DatabaseLocation) 
+        public bool DatabaseExists(string DatabaseLocation)
         {
             return File.Exists(DatabaseLocation);
         }
 
-        public void InsertSinglePhoto(PhotoData photoData) 
-        { 
+        public void InsertSinglePhoto(PhotoData photoData)
+        {
             //Insert a single PhotoData object into the database
-            using (DBConnection) 
-            { 
-            SqliteCommand InsertCommand = new SqliteCommand();
+            using (DBConnection)
+            {
+                SqliteCommand InsertCommand = new SqliteCommand();
                 try
                 {
                     InsertCommand.Connection = DBConnection;
-                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE,FILE_SIZE, EXIF_WIDTH, EXIF_HEIGHT, EXIF_FULL_IMAGE_SIZE,DATE_LAST_MODIFIED) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.FocalLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\",\"{photoData.FileSize}\",\"{photoData.ImageHeight}\",\"{photoData.ImageWidth}\",\"{photoData.FullImageSize}\",\"{photoData.DateLastModified}\")");
+                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_CAMERA_MODEL, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE,FILE_SIZE, EXIF_WIDTH, EXIF_HEIGHT, EXIF_FULL_IMAGE_SIZE,DATE_LAST_MODIFIED) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.CameraModel}\",\"{photoData.FocalLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\",\"{photoData.FileSize}\",\"{photoData.ImageHeight}\",\"{photoData.ImageWidth}\",\"{photoData.FullImageSize}\",\"{photoData.DateLastModified}\")");
                     Debug.Print(InsertCommand.CommandText);
 
                     try
@@ -85,17 +86,60 @@ namespace Photo_Tools
             }
         }
 
-        public void InsertPhotoList(List<PhotoData> photoData) 
-        { 
+        public void InsertPhotoList(List<PhotoData> photoData)
+        {
             //Insert a list of photodata objcts
         }
-        
-        
-        public List<PhotoData> GetDuplicateList() 
+
+
+        public List<PhotoData> GetDuplicateList(string FilePrefix)
         {   //run SQLite Script to get dulicates
             //return a list of duplicates in the form of a PhotoData List
-            return new List<PhotoData>(); 
+          
+            List<PhotoData> SQLResults = RunSQLGetPhotoCommand($"Select * from PhotoList Where [FILE_PREFIX] = '{FilePrefix}'");
+            return SQLResults; ;
+            
         }
+
+        public List<PhotoData> RunSQLGetPhotoCommand(string SQLcommand)
+        {
+            //Should this return a data reader instead of a photoData list, so other routines do the cycling thru?
+            List<PhotoData> duplicateList = new List<PhotoData>();
+
+            using (SqliteCommand command = new SqliteCommand(SQLcommand, DBConnection))
+
+            {
+                DBConnection.Open();
+                using (var reader = command.ExecuteReader())
+
+                {
+                    PhotoData duplicatePhoto = new PhotoData();
+
+                  
+                    while(reader.Read())
+
+                    {
+                        duplicatePhoto.ID = reader.GetString(0);
+                        duplicatePhoto.FileName = reader.GetString(2);
+                        duplicatePhoto.DateCaptured = reader.GetString(4);
+                        duplicatePhoto.Software = reader.GetString(9);
+                        duplicatePhoto.ImageWidth=reader.GetString(11);
+                        duplicatePhoto.ImageHeight = reader.GetString(12);
+                        duplicatePhoto.CameraMake = reader.GetString(5);
+                        duplicatePhoto.CameraModel = reader.GetString(17);
+                        
+                        duplicateList.Add(duplicatePhoto);
+                       
+                    }
+                   
+                }
+            }
+            return duplicateList;
+        }
+
+
+
+
 
         public void ExtractDuplicates(List<PhotoData> list, string FolderLocation)
         {
@@ -103,5 +147,44 @@ namespace Photo_Tools
 
         }
 
+        public void RunSQLCommand(string CommandToRun)
+        {
+            using (DBConnection)
+            {
+                SqliteCommand InsertCommand = new SqliteCommand();
+                try
+                {
+                    InsertCommand.Connection = DBConnection;
+                    InsertCommand.CommandText = (CommandToRun);
+                    Debug.Print(InsertCommand.CommandText);
+
+                    try
+                    {
+                        DBConnection.Open();
+                        InsertCommand.ExecuteNonQuery();
+                        DBConnection.Close();
+                    }
+                    catch (Exception)
+                    {
+
+                        Debug.Print($"Database Operatrion Failed for {InsertCommand.CommandText}");
+                    }
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+        }
+
+        public void UpdateLowHangingFruit() 
+        { 
+            RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
+            RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL' where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
+            RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE' Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND [PHOTO_STATUS] is null");
+            RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION' Where INSTR([FILE_PATH],'Version')>0");
+           
+        }
     }
 }

@@ -83,10 +83,10 @@ namespace Photo_Tools
                                 photoData.DateLastModified = MetadataTag.Description;
                                 break;
                             default:
-                                if (photoData.Extension.ToLower() == ".png")
-                                {
-                                    Console.WriteLine($"RandoData:{photoData.FilePath} - {MetadataTag.Name}:{MetadataTag.Description}");
-                                }
+//                                if (photoData.Extension.ToLower() == ".png")
+//                                {
+//                                    Console.WriteLine($"RandoData:{photoData.FilePath} - {MetadataTag.Name}:{MetadataTag.Description}");
+//                                }
                                 break;
 
                         }
