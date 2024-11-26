@@ -119,14 +119,14 @@ namespace Photo_Tools
                     while(reader.Read())
 
                     {
-                        duplicatePhoto.ID = reader.GetString(0);
-                        duplicatePhoto.FileName = reader.GetString(2);
-                        duplicatePhoto.DateCaptured = reader.GetString(4);
-                        duplicatePhoto.Software = reader.GetString(9);
-                        duplicatePhoto.ImageWidth=reader.GetString(11);
-                        duplicatePhoto.ImageHeight = reader.GetString(12);
-                        duplicatePhoto.CameraMake = reader.GetString(5);
-                        duplicatePhoto.CameraModel = reader.GetString(17);
+                        duplicatePhoto.ID = reader.GetString(reader.GetOrdinal("ID")); 
+                        duplicatePhoto.FileName = reader.GetString(reader.GetOrdinal("FILE_PATH"));
+                        duplicatePhoto.DateCaptured = reader.GetString(reader.GetOrdinal("EXIF_DATE_CAPTURED"));
+                        duplicatePhoto.Software = reader.GetString(reader.GetOrdinal("EXIF_SOFTWARE"));
+                        duplicatePhoto.ImageWidth=reader.GetString(reader.GetOrdinal("EXIF_WIDTH"));
+                        duplicatePhoto.ImageHeight = reader.GetString(reader.GetOrdinal("EXIF_HEIGHT"));
+                        duplicatePhoto.CameraMake = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MAKE"));
+                        duplicatePhoto.CameraModel = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MODEL"));
                         
                         duplicateList.Add(duplicatePhoto);
                        
