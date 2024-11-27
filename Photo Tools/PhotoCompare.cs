@@ -22,56 +22,77 @@ namespace Photo_Tools
             int counter = 0;
 
             OriginalPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * FROM PhotoList WHERE [PHOTO_STATUS] = 'ORIGINAL'");
+            Console.WriteLine($"{OriginalPhotos.Count} Original Photos Retrieved");
             foreach (PhotoData OriginalPhoto in OriginalPhotos)
             {
-                SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}'");
-                foreach (PhotoData SecondPhoto in SecondaryPhotos)
+               Console.WriteLine($"{OriginalPhotos.Count} Original Photos Found");
+                Console.WriteLine($"Checking {OriginalPhoto.FileName}");
+                try
                 {
 
+                    SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null");
 
-                    switch (SecondPhoto.Extension.ToLower())
-                    {
-                        case (".png:"): //PNG files have little metadata so only the image height and width can be compared
-                            {
-                                //This makes the math work
-                                counter = 1;
-
-                                //If the height and width do not match the original, it is a version
-                                //Sometimes a png file mixes up the height and width values so it has to be checked against both
-                                if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
-                                if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
-                                if (SecondPhoto.ImageHeight == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
-                                if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
-                                break;
-                            }
-                        default:
-                            {   //If all three of these properties match, the SecondPhoto is a duplicate
-                                //If the software is different, it means the photo has been edited and is a version
-                                counter = 0;
-                                if (SecondPhoto.DateCaptured == OriginalPhoto.DateCaptured) { counter++; }
-                                if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
-                                if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight) { counter++; }
-                                if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 0; }
-                                break;
-                            }
-                    }
-
-
-
-                    switch (counter)
-                    {
-                        case (0):
-                        case (1):
-                        case (2):
-                            { SecondPhoto.PhotoStatus = "VERSION"; break; }
-                        case (> 2):
-                            { SecondPhoto.PhotoStatus = "DUPLICATE"; break; }
-                    }
-
-                    PhotoDB.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = {SecondPhoto.PhotoStatus} WHERE [ID] = {SecondPhoto.ID}");
                 }
-            }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{ex.Message}");
+                    throw;
+                }
+                Console.WriteLine($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null");
+                Console.WriteLine($"Secondary Photos to Check {SecondaryPhotos.Count}");
+                if (SecondaryPhotos.Count > 0) 
+                {
+                    foreach (PhotoData SecondPhoto in SecondaryPhotos)
+                    {
+                        Console.WriteLine($"Against {SecondPhoto.FileName}");
 
+                        switch (SecondPhoto.Extension.ToLower())
+                        {
+                            case (".png:"): //PNG files have little metadata so only the image height and width can be compared
+                                {
+                                    //This makes the math work
+                                    counter = 1;
+
+                                    //If the height and width do not match the original, it is a version
+                                    //Sometimes a png file mixes up the height and width values so it has to be checked against both
+                                    if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
+                                    if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
+                                    if (SecondPhoto.ImageHeight == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
+                                    if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
+                                    break;
+                                }
+                            default:
+                                {   //If all three of these properties match, the SecondPhoto is a duplicate
+                                    //If the software is different, it means the photo has been edited and is a version
+                                    counter = 0;
+                                    if (SecondPhoto.DateCaptured == OriginalPhoto.DateCaptured) { counter++; }
+                                    if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
+                                    if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight) { counter++; }
+                                    if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 0; }
+                                    break;
+                                }
+                        }
+
+
+
+                        switch (counter)
+                        {
+                            case (0):
+                            case (1):
+                            case (2):
+                                { SecondPhoto.PhotoStatus = "VERSION"; break; }
+                            case (> 2):
+                                { SecondPhoto.PhotoStatus = "DUPLICATE"; break; }
+                        }
+                        Console.WriteLine($"Updating {SecondPhoto.FilePath} to {SecondPhoto.PhotoStatus}");
+                        PhotoDB.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}' WHERE [ID] = '{SecondPhoto.ID}'");
+                        Console.WriteLine($"Done checking {SecondPhoto.FilePath}");
+                    }
+                }
+                
+                Console.WriteLine($"Done Checking Duplicates for {OriginalPhoto.FileName}");
+            }
+            
         }
     }
 }

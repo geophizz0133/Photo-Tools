@@ -127,45 +127,52 @@ namespace Photo_Tools
 
         public List<PhotoData> GetListofPhotosFromDB(string SQLcommand)
         {
-            List<PhotoData> duplicateList = new List<PhotoData>();
-
+            List<PhotoData> photoList = new List<PhotoData>();
+            
             using (SqliteCommand command = new SqliteCommand(SQLcommand, DBConnection))
 
             {
                 DBConnection.Open();
-                using (var reader = command.ExecuteReader())
+                using (var photoReader = command.ExecuteReader())
 
                 {
-                    PhotoData duplicatePhoto = new PhotoData();
+                    PhotoData subjectPhoto = new PhotoData();
+
+                    Console.WriteLine($"Secondary Photo Records {photoReader.RecordsAffected}");
+                    Console.WriteLine(photoReader.HasRows);
+                    Console.WriteLine($"{photoReader.Read()}");
 
 
                     try
                     {
-                        while (reader.Read())
+                        Console.WriteLine($"{photoReader.Read()}");
+                        while (photoReader.Read()== true)
 
                         {
-                            duplicatePhoto.ID = reader.GetString(reader.GetOrdinal("ID"));
-                            duplicatePhoto.FileName = reader.GetString(reader.GetOrdinal("FILE_PATH"));
-                            duplicatePhoto.DateCaptured = reader.GetString(reader.GetOrdinal("EXIF_DATE_CAPTURED"));
-                            duplicatePhoto.Software = reader.GetString(reader.GetOrdinal("EXIF_SOFTWARE"));
-                            duplicatePhoto.ImageWidth = reader.GetString(reader.GetOrdinal("EXIF_WIDTH"));
-                            duplicatePhoto.ImageHeight = reader.GetString(reader.GetOrdinal("EXIF_HEIGHT"));
-                            duplicatePhoto.CameraMake = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MAKE"));
-                            duplicatePhoto.CameraModel = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MODEL"));
-                            duplicatePhoto.FilePrefix = reader.GetString(reader.GetOrdinal("FILE_PREFIX"));
+                            Console.WriteLine($"Secondary Photo: {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))}");
+                            subjectPhoto.ID = photoReader.GetString(photoReader.GetOrdinal("ID"));
+                            subjectPhoto.Extension = photoReader.GetString(photoReader.GetOrdinal("FILE_EXT"));
+                            subjectPhoto.FileName = photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"));
+                            subjectPhoto.DateCaptured = photoReader.GetString(photoReader.GetOrdinal("EXIF_DATE_CAPTURED"));
+                            subjectPhoto.Software = photoReader.GetString(photoReader.GetOrdinal("EXIF_SOFTWARE"));
+                            subjectPhoto.ImageWidth = photoReader.GetString(photoReader.GetOrdinal("EXIF_WIDTH"));
+                            subjectPhoto.ImageHeight = photoReader.GetString(photoReader.GetOrdinal("EXIF_HEIGHT"));
+                            subjectPhoto.CameraMake = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MAKE"));
+                            subjectPhoto.CameraModel = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MODEL"));
+                            subjectPhoto.FilePrefix = photoReader.GetString(photoReader.GetOrdinal("FILE_PREFIX"));
 
-                            duplicateList.Add(duplicatePhoto);
-
+                            photoList.Add(subjectPhoto);
+                            photoReader.Read();
                         }
                     }
                     catch (Exception)
                     {
-
+                        //Console.WriteLine($"Error retrieving duplicate photos: {e.message}");
                         throw;
                     }
                 }
             }
-            return duplicateList;
+            return photoList;
         }
 
 
@@ -183,8 +190,7 @@ namespace Photo_Tools
             using (DBConnection)
             {
                 SqliteCommand InsertCommand = new SqliteCommand();
-                try
-                {
+
                     InsertCommand.Connection = DBConnection;
                     InsertCommand.CommandText = (CommandToRun);
                     Debug.Print(InsertCommand.CommandText);
@@ -197,15 +203,9 @@ namespace Photo_Tools
                     }
                     catch (Exception)
                     {
-
-                        Debug.Print($"Database Operatrion Failed for {InsertCommand.CommandText}");
+                        //Debug.Print($"Database Operatrion Failed for {InsertCommand.CommandText}" + Environment.NewLine + $"Reason {e.message}");
+                        throw;
                     }
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
             }
         }
 
