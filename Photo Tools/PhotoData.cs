@@ -27,6 +27,7 @@ namespace Photo_Tools
         public string FullImageSize = String.Empty;
         public string DateLastModified = String.Empty;
         public string PhotoStatus = String.Empty;
+        public string FilePrefix = string.Empty;
         public bool DataChanged = false;
         
     }

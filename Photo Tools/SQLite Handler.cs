@@ -19,7 +19,7 @@ namespace Photo_Tools
     {
         public SqliteConnection DBConnection { get; set; }
 
-        public SQLite_Handler(string dbLocation, string SQLscript)
+        public SQLite_Handler(string dbLocation = $"D:/Scratch/PhotoTools.db", string SQLscript= $"D:/Scratch/CREATE TABLE PhotoList .txt")
         {
             try
             {
@@ -152,6 +152,7 @@ namespace Photo_Tools
                             duplicatePhoto.ImageHeight = reader.GetString(reader.GetOrdinal("EXIF_HEIGHT"));
                             duplicatePhoto.CameraMake = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MAKE"));
                             duplicatePhoto.CameraModel = reader.GetString(reader.GetOrdinal("EXIF_CAMERA_MODEL"));
+                            duplicatePhoto.FilePrefix = reader.GetString(reader.GetOrdinal("FILE_PREFIX"));
 
                             duplicateList.Add(duplicatePhoto);
 

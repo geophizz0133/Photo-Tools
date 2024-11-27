@@ -74,3 +74,7 @@ catch (Exception)
     throw;
 }
 
+Console.WriteLine("Starting Photo Comparison");
+PhotoCompare RunCompare = new PhotoCompare();
+RunCompare.Compare();
+Console.WriteLine("Comparison Done");
