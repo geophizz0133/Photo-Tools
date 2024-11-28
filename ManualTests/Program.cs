@@ -12,11 +12,12 @@ try
 	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/CREATE TABLE PhotoList .txt");
 	Console.WriteLine("Connecting with specific location and SQL Code - Works");
 
+    /*
     Console.WriteLine("Starting Photo Comparison");
     PhotoCompare RunCompare = new PhotoCompare();
     RunCompare.Compare();
     Console.WriteLine("Comparison Done");
-
+    */
     
     //Clear the PhotoList table
     Console.WriteLine("Clearing the database");
@@ -71,6 +72,11 @@ try
         Console.WriteLine(photo.Software);
     }
 
+    //Find the Versions and Duplicates
+    Console.WriteLine("Starting Photo Comparison");
+    PhotoCompare RunCompare = new PhotoCompare();
+    RunCompare.Compare();
+    Console.WriteLine("Comparison Done");
     Console.WriteLine($"Press any key to quit");Console.Read();
 }
 catch (Exception)
