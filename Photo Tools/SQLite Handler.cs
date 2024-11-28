@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using System.IO;
@@ -136,20 +137,20 @@ namespace Photo_Tools
                 using (var photoReader = command.ExecuteReader())
 
                 {
-                    PhotoData subjectPhoto = new PhotoData();
+                    //PhotoData subjectPhoto = new PhotoData();
 
-                    Console.WriteLine($"Secondary Photo Records {photoReader.RecordsAffected}");
-                    Console.WriteLine(photoReader.HasRows);
-                    Console.WriteLine($"{photoReader.Read()}");
-
-
-                    try
-                    {
-                        Console.WriteLine($"{photoReader.Read()}");
-                        while (photoReader.Read()== true)
-
+                    
+                    Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) Photos Found: {photoReader.HasRows}");
+                    // Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) Reading records {photoReader.Read()}");
+                    int recordcounter = 0;
+                      //  Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) - READ {photoReader.Read()}");
+                        while (photoReader.Read())
                         {
-                            Console.WriteLine($"Secondary Photo: {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))}");
+                        PhotoData subjectPhoto = new PhotoData();
+                        Console.WriteLine($"Record {recordcounter}");
+                            Console.WriteLine("__________________________________________________________________________________________________");
+                            Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand})  Photo: {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))}");
+                            subjectPhoto.recordnumber = recordcounter;
                             subjectPhoto.ID = photoReader.GetString(photoReader.GetOrdinal("ID"));
                             subjectPhoto.Extension = photoReader.GetString(photoReader.GetOrdinal("FILE_EXT"));
                             subjectPhoto.FileName = photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"));
@@ -161,14 +162,23 @@ namespace Photo_Tools
                             subjectPhoto.CameraModel = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MODEL"));
                             subjectPhoto.FilePrefix = photoReader.GetString(photoReader.GetOrdinal("FILE_PREFIX"));
 
+                            Debug.Print($"Record {recordcounter} Photo: {subjectPhoto.FileName} ADDED TO LIST");
+
                             photoList.Add(subjectPhoto);
-                            photoReader.Read();
+                            recordcounter++;
                         }
-                    }
-                    catch (Exception)
+
+                   // Console.WriteLine($"Photo {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))} Added to List");
+                    Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) Reading next record");
+                   // Console.WriteLine($"Reading next is: {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))}");
+                    Console.WriteLine("_______________________________________________________________________________");
+
+                    Console.WriteLine("Verifying List");
+                    recordcounter = 0;  
+                    foreach (PhotoData photo in photoList)
                     {
-                        //Console.WriteLine($"Error retrieving duplicate photos: {e.message}");
-                        throw;
+                        Console.WriteLine($"Record {recordcounter} Photo:{photo.recordnumber}:{photo.ID}/{photo.FileName}");
+                        recordcounter++;
                     }
                 }
             }
@@ -198,13 +208,14 @@ namespace Photo_Tools
                     try
                     {
                         DBConnection.Open();
+                       
                         InsertCommand.ExecuteNonQuery();
                         DBConnection.Close();
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        //Debug.Print($"Database Operatrion Failed for {InsertCommand.CommandText}" + Environment.NewLine + $"Reason {e.message}");
-                        throw;
+                        Debug.Print($"Database Operatrion Failed for {InsertCommand.CommandText}" + Environment.NewLine + $"Reason: {e.Message}/{e.InnerException}");
+                          throw;
                     }
             }
         }
@@ -218,9 +229,9 @@ namespace Photo_Tools
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE' Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND [PHOTO_STATUS] is null");
                 RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION' Where INSTR([FILE_PATH],'Version')>0");
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
+                Console.Write(e.ToString());
                 throw;
             }
            

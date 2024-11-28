@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
@@ -22,29 +23,28 @@ namespace Photo_Tools
             int counter = 0;
 
             OriginalPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * FROM PhotoList WHERE [PHOTO_STATUS] = 'ORIGINAL'");
-            Console.WriteLine($"{OriginalPhotos.Count} Original Photos Retrieved");
+            Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
+
+            //Temp code
+           
+            foreach (var photo in OriginalPhotos) 
+            { 
+                Console.WriteLine($"Photo in List: {photo.recordnumber}:{ photo.FileName} - {photo.ID}");
+            }
+
+           
             foreach (PhotoData OriginalPhoto in OriginalPhotos)
             {
-               Console.WriteLine($"{OriginalPhotos.Count} Original Photos Found");
-                Console.WriteLine($"Checking {OriginalPhoto.FileName}");
-                try
-                {
+                Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}");
+
 
                     SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null");
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"{ex.Message}");
-                    throw;
-                }
-                Console.WriteLine($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null");
-                Console.WriteLine($"Secondary Photos to Check {SecondaryPhotos.Count}");
-                if (SecondaryPhotos.Count > 0) 
-                {
+                    Console.WriteLine($"PhotoCompare.Compare().GetListOfPhotosFromDB(SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null)");                   
+                    Console.WriteLine($" PhotoCompare.Compare() - {SecondaryPhotos.Count} Secondary Photos Retreieved");
+                
                     foreach (PhotoData SecondPhoto in SecondaryPhotos)
                     {
-                        Console.WriteLine($"Against {SecondPhoto.FileName}");
+                        Debug.Print($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
 
                         switch (SecondPhoto.Extension.ToLower())
                         {
@@ -72,9 +72,6 @@ namespace Photo_Tools
                                     break;
                                 }
                         }
-
-
-
                         switch (counter)
                         {
                             case (0):
@@ -84,13 +81,12 @@ namespace Photo_Tools
                             case (> 2):
                                 { SecondPhoto.PhotoStatus = "DUPLICATE"; break; }
                         }
-                        Console.WriteLine($"Updating {SecondPhoto.FilePath} to {SecondPhoto.PhotoStatus}");
+                        Console.WriteLine($"PhotoCompare.Compare() - Updating {SecondPhoto.FileName} to {SecondPhoto.PhotoStatus}");
                         PhotoDB.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}' WHERE [ID] = '{SecondPhoto.ID}'");
-                        Console.WriteLine($"Done checking {SecondPhoto.FilePath}");
+                        Console.WriteLine($"PhotoCompare.Compare() - Done checking {OriginalPhoto.FileName}/{SecondPhoto.FilePath}");
                     }
-                }
-                
-                Console.WriteLine($"Done Checking Duplicates for {OriginalPhoto.FileName}");
+                                
+
             }
             
         }

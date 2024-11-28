@@ -17,7 +17,7 @@ try
     RunCompare.Compare();
     Console.WriteLine("Comparison Done");
 
-
+    
     //Clear the PhotoList table
     Console.WriteLine("Clearing the database");
     dbTester.RunSQLCommand("delete from PhotoList");

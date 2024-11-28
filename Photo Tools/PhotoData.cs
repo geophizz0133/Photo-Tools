@@ -9,6 +9,7 @@ namespace Photo_Tools
 {
     public class PhotoData
     {
+        public int recordnumber = 0;
         public string ID = String.Empty;
         public string FilePath = String.Empty;
         public string FileName = String.Empty;
