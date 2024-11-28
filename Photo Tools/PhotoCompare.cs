@@ -22,7 +22,7 @@ namespace Photo_Tools
         {
             int counter = 0;
 
-            OriginalPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * FROM PhotoList WHERE [PHOTO_STATUS] = 'ORIGINAL'");
+            OriginalPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT DISTINCT [ORIGINAL_PHOTO] FROM vw_ALL_ORIGINALS");
             Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
 
             //Temp code
@@ -38,7 +38,7 @@ namespace Photo_Tools
                 Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}");
 
 
-                    SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null");
+                    SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND ([PHOTO_STATUS] is null or ([DUPLICATE_SCORE]<>0 or [DUPLICATE_SCORE] is null)");
                     Console.WriteLine($"PhotoCompare.Compare().GetListOfPhotosFromDB(SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null)");                   
                     Console.WriteLine($" PhotoCompare.Compare() - {SecondaryPhotos.Count} Secondary Photos Retreieved");
                 
@@ -51,7 +51,7 @@ namespace Photo_Tools
                             case (".png:"): //PNG files have little metadata so only the image height and width can be compared
                                 {
                                     //This makes the math work
-                                    counter = 2;
+                                    counter = 3;
 
                                     //If the height and width do not match the original, it is a version
                                     //Sometimes a png file mixes up the height and width values so it has to be checked against both
@@ -64,11 +64,11 @@ namespace Photo_Tools
                             default:
                                 {   //If all three of these properties match, the SecondPhoto is a duplicate
                                     //If the software is different, it means the photo has been edited and is a version
-                                    counter = 0;
+                                    counter = 1;
                                     if (SecondPhoto.DateCaptured == OriginalPhoto.DateCaptured) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight) { counter++; }
-                                    if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 0; }
+                                    if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version
                                     break;
                                 }
                         }
@@ -76,14 +76,16 @@ namespace Photo_Tools
                         switch (counter)
                         {
                             case (0):
+                                { SecondPhoto.PhotoStatus = "ORIGINAL"; break; } //Whoah man, this should never happen here
                             case (1):
                             case (2):
+                            case (3):
                                 { SecondPhoto.PhotoStatus = "VERSION"; break; }
-                            case (> 2):
+                            case (> 3):
                                 { SecondPhoto.PhotoStatus = "DUPLICATE"; break; }
                         }
                         Debug.Print($"PhotoCompare.Compare() - Updating {SecondPhoto.FileName} to {SecondPhoto.PhotoStatus}");
-                        PhotoDB.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}' WHERE [ID] = '{SecondPhoto.ID}'");
+                        PhotoDB.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}',[DUPLICATE_SCORE] = {SecondPhoto.DuplicateScore} WHERE [ID] = '{SecondPhoto.ID}'");
                     }
                                 
 

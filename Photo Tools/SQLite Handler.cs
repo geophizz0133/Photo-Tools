@@ -205,9 +205,9 @@ namespace Photo_Tools
             try
             {
                 RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
-                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL' where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
-                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE' Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND [PHOTO_STATUS] is null");
-                RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION' Where INSTR([FILE_PATH],'Version')>0");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 where [FILE_PATH] in (SELECT DISTINCT [ORIGINAL_PHOTO] FROM vw_ALL_ORIGINALS)");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null>0)");
+                RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION', [DUPLICATE_SCORE] = 1 Where INSTR([FILE_PATH],'Version')>0");
             }
             catch (Exception e)
             {

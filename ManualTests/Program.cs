@@ -33,16 +33,21 @@ try
 
     DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2014/2014-12");
     Console.WriteLine("Starting folder scan:");
+    int fileLocation = 0;
+    int fileCount = FileFolder.EnumerateFileSystemInfos().Count();
+
     foreach (var filename in FileFolder.EnumerateFiles())
     {
-        Console.Write(".");
         try
         {
+            Console.SetCursorPosition(0,5);
+            Console.Write($"Reading {fileLocation}/{fileCount}");
             string filePath = filename.FullName.ToString();
             Debug.Print($"Reading {filePath}"); 
             PhotoData photo = metadataHandler.ReadPhoto(filePath);
             dbTester.InsertSinglePhoto(photo);
             photoData.Add(photo);
+            fileLocation++;
             //photoData.Add(metadataHandler.ReadPhoto(filePath));
             
         }
@@ -52,7 +57,8 @@ try
         }
             
     }
-    Console.Clear();
+   // Console.Clear();
+   
   
 
     //Update the file prefix field in the DB (It is faster than doing it in c#)
@@ -72,12 +78,14 @@ try
         Console.WriteLine(photo.Software);
     }
 
+    
     //Find the Versions and Duplicates
     Console.WriteLine("Starting Photo Comparison");
     PhotoCompare RunCompare = new PhotoCompare();
     RunCompare.Compare();
     Console.WriteLine("Comparison Done");
     Console.WriteLine($"Press any key to quit");Console.Read();
+    
 }
 catch (Exception)
 {
