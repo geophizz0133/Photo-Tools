@@ -51,7 +51,7 @@ namespace Photo_Tools
                             case (".png:"): //PNG files have little metadata so only the image height and width can be compared
                                 {
                                     //This makes the math work
-                                    counter = 1;
+                                    counter = 2;
 
                                     //If the height and width do not match the original, it is a version
                                     //Sometimes a png file mixes up the height and width values so it has to be checked against both
@@ -72,6 +72,7 @@ namespace Photo_Tools
                                     break;
                                 }
                         }
+                        SecondPhoto.DuplicateScore = counter;
                         switch (counter)
                         {
                             case (0):
@@ -81,9 +82,8 @@ namespace Photo_Tools
                             case (> 2):
                                 { SecondPhoto.PhotoStatus = "DUPLICATE"; break; }
                         }
-                        Console.WriteLine($"PhotoCompare.Compare() - Updating {SecondPhoto.FileName} to {SecondPhoto.PhotoStatus}");
+                        Debug.Print($"PhotoCompare.Compare() - Updating {SecondPhoto.FileName} to {SecondPhoto.PhotoStatus}");
                         PhotoDB.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}' WHERE [ID] = '{SecondPhoto.ID}'");
-                        Console.WriteLine($"PhotoCompare.Compare() - Done checking {OriginalPhoto.FileName}/{SecondPhoto.FilePath}");
                     }
                                 
 

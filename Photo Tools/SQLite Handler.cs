@@ -137,19 +137,11 @@ namespace Photo_Tools
                 using (var photoReader = command.ExecuteReader())
 
                 {
-                    //PhotoData subjectPhoto = new PhotoData();
-
-                    
-                    Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) Photos Found: {photoReader.HasRows}");
-                    // Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) Reading records {photoReader.Read()}");
                     int recordcounter = 0;
-                      //  Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) - READ {photoReader.Read()}");
                         while (photoReader.Read())
                         {
-                        PhotoData subjectPhoto = new PhotoData();
-                        Console.WriteLine($"Record {recordcounter}");
-                            Console.WriteLine("__________________________________________________________________________________________________");
-                            Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand})  Photo: {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))}");
+                            PhotoData subjectPhoto = new PhotoData();
+
                             subjectPhoto.recordnumber = recordcounter;
                             subjectPhoto.ID = photoReader.GetString(photoReader.GetOrdinal("ID"));
                             subjectPhoto.Extension = photoReader.GetString(photoReader.GetOrdinal("FILE_EXT"));
@@ -162,24 +154,11 @@ namespace Photo_Tools
                             subjectPhoto.CameraModel = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MODEL"));
                             subjectPhoto.FilePrefix = photoReader.GetString(photoReader.GetOrdinal("FILE_PREFIX"));
 
-                            Debug.Print($"Record {recordcounter} Photo: {subjectPhoto.FileName} ADDED TO LIST");
-
                             photoList.Add(subjectPhoto);
                             recordcounter++;
                         }
 
-                   // Console.WriteLine($"Photo {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))} Added to List");
-                    Console.WriteLine($"SQLiteHandler.GetListofPhotsFromDB({SQLcommand}) Reading next record");
-                   // Console.WriteLine($"Reading next is: {photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"))}");
-                    Console.WriteLine("_______________________________________________________________________________");
 
-                    Console.WriteLine("Verifying List");
-                    recordcounter = 0;  
-                    foreach (PhotoData photo in photoList)
-                    {
-                        Console.WriteLine($"Record {recordcounter} Photo:{photo.recordnumber}:{photo.ID}/{photo.FileName}");
-                        recordcounter++;
-                    }
                 }
             }
             return photoList;
@@ -221,7 +200,8 @@ namespace Photo_Tools
         }
 
         public void UpdateLowHangingFruit() 
-        {
+        { 
+            Console.WriteLine($"Updating the low hanging fruit");
             try
             {
                 RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");

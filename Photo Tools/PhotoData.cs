@@ -30,6 +30,8 @@ namespace Photo_Tools
         public string PhotoStatus = String.Empty;
         public string FilePrefix = string.Empty;
         public bool DataChanged = false;
+        public int DuplicateScore = 0;
+        public bool isMonochrome = false;
         
     }
 }
