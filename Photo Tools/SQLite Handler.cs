@@ -128,10 +128,11 @@ namespace Photo_Tools
 
         public List<PhotoData> GetListofPhotosFromDB(string SQLcommand)
         {
+            Debug.Print(SQLcommand);
             List<PhotoData> photoList = new List<PhotoData>();
             
             using (SqliteCommand command = new SqliteCommand(SQLcommand, DBConnection))
-
+                
             {
                 DBConnection.Open();
                 using (var photoReader = command.ExecuteReader())

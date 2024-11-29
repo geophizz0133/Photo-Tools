@@ -22,23 +22,15 @@ namespace Photo_Tools
         {
             int counter = 0;
 
-            OriginalPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT DISTINCT [ORIGINAL_PHOTO] FROM vw_ALL_ORIGINALS");
+            OriginalPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [ID] in (SELECT DISTINCT [ID] FROM vw_ALL_ORIGINALS)");
             Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
-
-            //Temp code
-           
-            foreach (var photo in OriginalPhotos) 
-            { 
-                Console.WriteLine($"Photo in List: {photo.recordnumber}:{ photo.FileName} - {photo.ID}");
-            }
-
-           
+    
             foreach (PhotoData OriginalPhoto in OriginalPhotos)
             {
                 Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}");
 
 
-                    SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND ([PHOTO_STATUS] is null or ([DUPLICATE_SCORE]<>0 or [DUPLICATE_SCORE] is null)");
+                    SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND ([PHOTO_STATUS] is null or ([DUPLICATE_SCORE]<>0 or [DUPLICATE_SCORE] is null))");
                     Console.WriteLine($"PhotoCompare.Compare().GetListOfPhotosFromDB(SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null)");                   
                     Console.WriteLine($" PhotoCompare.Compare() - {SecondaryPhotos.Count} Secondary Photos Retreieved");
                 
@@ -48,17 +40,31 @@ namespace Photo_Tools
 
                         switch (SecondPhoto.Extension.ToLower())
                         {
-                            case (".png:"): //PNG files have little metadata so only the image height and width can be compared
+                        case (".mov"):
+                        case (".mp4"):
+                            //Ignore video files
+                            { break; }
+                        case (".png"): //PNG files have little metadata so only the image height and width can be compared
                                 {
                                     //This makes the math work
                                     counter = 3;
+                                    if(OriginalPhoto.Extension.ToLower() == ".mov" && SecondPhoto.Extension.ToLower() == ".png"){ break; } //Skip it because width/height of the .mov can't be evaluated
+                                    
+                                    Debug.Print($"OriginalPhoto {OriginalPhoto.Extension.ToLower()} - {OriginalPhoto.Extension.ToLower() != ".mov"}");
+                                    Debug.Print($"OriginalPhoto {OriginalPhoto.Extension.ToLower()} - {OriginalPhoto.Extension.ToLower() != ".mp4"}");
+                                    Debug.Print($"SecondPhoto {SecondPhoto.Extension.ToLower()} - {SecondPhoto.Extension.ToLower() != ".mov"}");
+                                    Debug.Print($"SecondPhoto {SecondPhoto.Extension.ToLower()} - {SecondPhoto.Extension.ToLower() != ".mp4"}");
+                                    Debug.Print($"If any of the above is true, this code should not execute");
 
+                                    
+                                    Debug.Print($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
                                     //If the height and width do not match the original, it is a version
                                     //Sometimes a png file mixes up the height and width values so it has to be checked against both
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
+                                    
                                     break;
                                 }
                             default:

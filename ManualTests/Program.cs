@@ -13,11 +13,7 @@ try
 	Console.WriteLine("Connecting with specific location and SQL Code - Works");
 
     /*
-    Console.WriteLine("Starting Photo Comparison");
-    PhotoCompare RunCompare = new PhotoCompare();
-    RunCompare.Compare();
-    Console.WriteLine("Comparison Done");
-    */
+
     
     //Clear the PhotoList table
     Console.WriteLine("Clearing the database");
@@ -57,27 +53,15 @@ try
         }
             
     }
-   // Console.Clear();
+
    
-  
+  */
 
     //Update the file prefix field in the DB (It is faster than doing it in c#)
     Console.WriteLine("Updating Low Hanging Fruit");
     dbTester.UpdateLowHangingFruit();
 
     Console.WriteLine("Retrieving Originals");
-    List<PhotoData> Originals = dbTester.GetListofPhotosFromDB("SELECT * from PhotoList where [PHOTO_STATUS]='ORIGINAL'");
-    foreach (PhotoData photo in Originals)
-    {
-        Console.WriteLine();
-        Console.WriteLine(photo.ID);
-        Console.WriteLine(photo.FileName);
-        Console.WriteLine(photo.DateCaptured);
-        Console.WriteLine(photo.CameraMake);
-        Console.WriteLine(photo.CameraModel);
-        Console.WriteLine(photo.Software);
-    }
-
     
     //Find the Versions and Duplicates
     Console.WriteLine("Starting Photo Comparison");
