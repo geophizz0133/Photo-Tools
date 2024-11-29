@@ -68,10 +68,12 @@ namespace Photo_Tools
                                     break;
                                 }
                             default:
-                                {   //If all three of these properties match, the SecondPhoto is a duplicate
+                                {   //If all 4 of these properties match, the SecondPhoto is a duplicate
                                     //If the software is different, it means the photo has been edited and is a version
                                     counter = 1;
+                                    
                                     if (SecondPhoto.DateCaptured == OriginalPhoto.DateCaptured) { counter++; }
+                                    if (SecondPhoto.Extension == OriginalPhoto.Extension) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight) { counter++; }
                                     if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version
