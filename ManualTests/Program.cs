@@ -12,7 +12,7 @@ try
 	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/CREATE TABLE PhotoList .txt");
 	Console.WriteLine("Connecting with specific location and SQL Code - Works");
 
-    /*
+    
 
     
     //Clear the PhotoList table
@@ -55,7 +55,7 @@ try
     }
 
    
-  */
+  
 
     //Update the file prefix field in the DB (It is faster than doing it in c#)
     Console.WriteLine("Updating Low Hanging Fruit");

@@ -12,7 +12,9 @@ namespace Photo_Tools
     {
         public PhotoCompare() { }
 
-        SQLite_Handler PhotoDB = new SQLite_Handler();
+        SQLite_Handler PhotoDBHandler = new SQLite_Handler();
+        ImageHandler PhotoImageHandler = new ImageHandler();
+
         public List<PhotoData> OriginalPhotos = new List<PhotoData>();
         public List<PhotoData> SecondaryPhotos = new List<PhotoData>();
 
@@ -22,7 +24,7 @@ namespace Photo_Tools
         {
             int counter = 0;
 
-            OriginalPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [ID] in (SELECT DISTINCT [ID] FROM vw_ALL_ORIGINALS)");
+            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [ID] in (SELECT DISTINCT [ID] FROM vw_ALL_ORIGINALS)");
             Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
     
             foreach (PhotoData OriginalPhoto in OriginalPhotos)
@@ -30,7 +32,7 @@ namespace Photo_Tools
                 Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}");
 
 
-                    SecondaryPhotos = PhotoDB.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND ([PHOTO_STATUS] is null or ([DUPLICATE_SCORE]<>0 or [DUPLICATE_SCORE] is null))");
+                    SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND ([PHOTO_STATUS] is null or ([DUPLICATE_SCORE]<>0 or [DUPLICATE_SCORE] is null))");
                     Console.WriteLine($"PhotoCompare.Compare().GetListOfPhotosFromDB(SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null)");                   
                     Console.WriteLine($" PhotoCompare.Compare() - {SecondaryPhotos.Count} Secondary Photos Retreieved");
                 
@@ -64,6 +66,9 @@ namespace Photo_Tools
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
+                                    if (SecondPhoto.isMonochrome == OriginalPhoto.isMonochrome) { counter++; }
+                                    if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
+
                                     
                                     break;
                                 }
@@ -76,6 +81,8 @@ namespace Photo_Tools
                                     if (SecondPhoto.Extension == OriginalPhoto.Extension) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight) { counter++; }
+                                    if (SecondPhoto.isMonochrome == OriginalPhoto.isMonochrome) { counter++; }
+                                    if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
                                     if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version
                                     break;
                                 }
@@ -93,7 +100,7 @@ namespace Photo_Tools
                                 { SecondPhoto.PhotoStatus = "DUPLICATE"; break; }
                         }
                         Debug.Print($"PhotoCompare.Compare() - Updating {SecondPhoto.FileName} to {SecondPhoto.PhotoStatus}");
-                        PhotoDB.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}',[DUPLICATE_SCORE] = {SecondPhoto.DuplicateScore} WHERE [ID] = '{SecondPhoto.ID}'");
+                        PhotoDBHandler.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}',[DUPLICATE_SCORE] = {SecondPhoto.DuplicateScore} WHERE [ID] = '{SecondPhoto.ID}'");
                     }
                                 
 

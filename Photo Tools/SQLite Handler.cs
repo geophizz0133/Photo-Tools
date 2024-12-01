@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Collections;
 
 
+
 namespace Photo_Tools
 {
     public class SQLite_Handler
@@ -87,7 +88,7 @@ namespace Photo_Tools
                 try
                 {
                     InsertCommand.Connection = DBConnection;
-                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_CAMERA_MODEL, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE,FILE_SIZE, EXIF_WIDTH, EXIF_HEIGHT, EXIF_FULL_IMAGE_SIZE,DATE_LAST_MODIFIED) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.CameraModel}\",\"{photoData.FocalLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\",\"{photoData.FileSize}\",\"{photoData.ImageHeight}\",\"{photoData.ImageWidth}\",\"{photoData.FullImageSize}\",\"{photoData.DateLastModified}\")");
+                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_CAMERA_MODEL, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE,FILE_SIZE, EXIF_WIDTH, EXIF_HEIGHT, EXIF_FULL_IMAGE_SIZE,DATE_LAST_MODIFIED,PHOTO_IS_MONOCHROME) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.CameraModel}\",\"{photoData.FocalLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\",\"{photoData.FileSize}\",\"{photoData.ImageHeight}\",\"{photoData.ImageWidth}\",\"{photoData.FullImageSize}\",\"{photoData.DateLastModified}\",{photoData.isMonochrome})");
                     Debug.Print(InsertCommand.CommandText);
 
                     try
@@ -141,19 +142,22 @@ namespace Photo_Tools
                     int recordcounter = 0;
                         while (photoReader.Read())
                         {
-                            PhotoData subjectPhoto = new PhotoData();
+                        PhotoData subjectPhoto = new PhotoData();
 
-                            subjectPhoto.recordnumber = recordcounter;
-                            subjectPhoto.ID = photoReader.GetString(photoReader.GetOrdinal("ID"));
-                            subjectPhoto.Extension = photoReader.GetString(photoReader.GetOrdinal("FILE_EXT"));
-                            subjectPhoto.FileName = photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"));
-                            subjectPhoto.DateCaptured = photoReader.GetString(photoReader.GetOrdinal("EXIF_DATE_CAPTURED"));
-                            subjectPhoto.Software = photoReader.GetString(photoReader.GetOrdinal("EXIF_SOFTWARE"));
-                            subjectPhoto.ImageWidth = photoReader.GetString(photoReader.GetOrdinal("EXIF_WIDTH"));
-                            subjectPhoto.ImageHeight = photoReader.GetString(photoReader.GetOrdinal("EXIF_HEIGHT"));
-                            subjectPhoto.CameraMake = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MAKE"));
-                            subjectPhoto.CameraModel = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MODEL"));
-                            subjectPhoto.FilePrefix = photoReader.GetString(photoReader.GetOrdinal("FILE_PREFIX"));
+                        subjectPhoto.recordnumber = recordcounter;
+                        subjectPhoto.ID = photoReader.GetString(photoReader.GetOrdinal("ID"));
+                        subjectPhoto.Extension = photoReader.GetString(photoReader.GetOrdinal("FILE_EXT"));
+                        subjectPhoto.FileName = photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"));
+                        subjectPhoto.FilePath = photoReader.GetString(photoReader.GetOrdinal("FILE_NAME"));
+                        subjectPhoto.DateCaptured = photoReader.GetString(photoReader.GetOrdinal("EXIF_DATE_CAPTURED"));
+                        subjectPhoto.Software = photoReader.GetString(photoReader.GetOrdinal("EXIF_SOFTWARE"));
+                        subjectPhoto.ImageWidth = photoReader.GetString(photoReader.GetOrdinal("EXIF_WIDTH"));
+                        subjectPhoto.ImageHeight = photoReader.GetString(photoReader.GetOrdinal("EXIF_HEIGHT"));
+                        subjectPhoto.CameraMake = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MAKE"));
+                        subjectPhoto.CameraModel = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MODEL"));
+                        subjectPhoto.FilePrefix = photoReader.GetString(photoReader.GetOrdinal("FILE_PREFIX"));
+                        subjectPhoto.isMonochrome = photoReader.GetBoolean(photoReader.GetOrdinal("PHOTO_IS_MONOCHROME"));
+                        subjectPhoto.RGBHash = photoReader.GetString(photoReader.GetOrdinal("PHOTO_RGB_HASH"));
 
                             photoList.Add(subjectPhoto);
                             recordcounter++;
@@ -164,6 +168,7 @@ namespace Photo_Tools
             }
             return photoList;
         }
+
 
 
 

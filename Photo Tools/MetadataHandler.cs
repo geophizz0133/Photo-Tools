@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Photo_Tools
 {
@@ -21,13 +22,17 @@ namespace Photo_Tools
         public PhotoData ReadPhoto(string PhotoFileLocation)
         {
             PhotoData photoData = new PhotoData();
-           
+
+            Debug.Print(PhotoFileLocation);
+
             FileInfo fileInfo = new FileInfo(PhotoFileLocation);
             photoData.ID = new UniqueId().ToString();
             photoData.FilePath = PhotoFileLocation;
             photoData.FileName = fileInfo.Name;
             photoData.Extension = fileInfo.Extension;
             photoData.FileSize = fileInfo.Length.ToString();
+            photoData.isMonochrome = DetermineMonochrome(PhotoFileLocation);
+            photoData.RGBHash = String.Empty;
 
            
                 var directories = ImageMetadataReader.ReadMetadata(PhotoFileLocation);
@@ -93,7 +98,13 @@ namespace Photo_Tools
 
                     }
                 }
-           return photoData;
+            GC.Collect();
+            return photoData;
+        }
+        public bool DetermineMonochrome(string filePath)
+        {
+            ImageHandler photoHandler = new ImageHandler();
+            return photoHandler.IsMonochrome(filePath);
         }
     }
 }
