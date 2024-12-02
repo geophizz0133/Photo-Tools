@@ -24,7 +24,7 @@ namespace Photo_Tools
         {
             int counter = 0;
 
-            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [ID] in (SELECT DISTINCT [ID] FROM vw_ALL_ORIGINALS)");
+            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)"); //This simply gets all files
             Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
     
             foreach (PhotoData OriginalPhoto in OriginalPhotos)
@@ -50,7 +50,8 @@ namespace Photo_Tools
                                 {
                                     //This makes the math work
                                     counter = 3;
-                                    if(OriginalPhoto.Extension.ToLower() == ".mov" && SecondPhoto.Extension.ToLower() == ".png"){ break; } //Skip it because width/height of the .mov can't be evaluated
+                                    //Skip MOV screenshots
+                                    if(OriginalPhoto.Extension.ToLower() == ".mov" && SecondPhoto.Extension.ToLower() == ".png"){ break; } //Skip it because it is a png screenshot of an mov and width/height of the .mov can't be evaluated
                                     
                                     Debug.Print($"OriginalPhoto {OriginalPhoto.Extension.ToLower()} - {OriginalPhoto.Extension.ToLower() != ".mov"}");
                                     Debug.Print($"OriginalPhoto {OriginalPhoto.Extension.ToLower()} - {OriginalPhoto.Extension.ToLower() != ".mp4"}");
@@ -58,21 +59,32 @@ namespace Photo_Tools
                                     Debug.Print($"SecondPhoto {SecondPhoto.Extension.ToLower()} - {SecondPhoto.Extension.ToLower() != ".mp4"}");
                                     Debug.Print($"If any of the above is true, this code should not execute");
 
-                                    
                                     Debug.Print($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
-                                    //If the height and width do not match the original, it is a version
-                                    //Sometimes a png file mixes up the height and width values so it has to be checked against both
+                                
+                                //If the height and width do not match the original, it is a version
+                                //Sometimes a png file mixes up the height and width values so it has to be checked against both
+                                try
+                                {
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.isMonochrome == OriginalPhoto.isMonochrome) { counter++; }
-                                    if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
-
-                                    
-                                    break;
+                                    //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
                                 }
-                            default:
+                                catch (Exception) //Generally thrown if the resulution is less that 1000x1000 pixels
+                                {
+                                    if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight.Substring(0, 3)) { counter++; }
+                                    if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth.Substring(0, 3)) { counter++; }
+                                    if (SecondPhoto.ImageHeight == OriginalPhoto.ImageWidth.Substring(0, 3)) { counter++; }
+                                    if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight.Substring(0, 3)) { counter++; }
+                                    if (SecondPhoto.isMonochrome == OriginalPhoto.isMonochrome) { counter++; }
+                                    //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
+
+                                }
+                                break;
+                                }
+                                default:
                                 {   //If all 4 of these properties match, the SecondPhoto is a duplicate
                                     //If the software is different, it means the photo has been edited and is a version
                                     counter = 1;
@@ -81,8 +93,8 @@ namespace Photo_Tools
                                     if (SecondPhoto.Extension == OriginalPhoto.Extension) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight) { counter++; }
-                                    if (SecondPhoto.isMonochrome == OriginalPhoto.isMonochrome) { counter++; }
-                                    if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
+                                    //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }      
+                                    if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter = 1; }//If one is in Mono, it is a version
                                     if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version
                                     break;
                                 }
