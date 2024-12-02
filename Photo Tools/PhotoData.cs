@@ -7,8 +7,10 @@ using System.Xml;
 
 namespace Photo_Tools
 {
-    public class PhotoData
+    public class PhotoData 
     {
+     
+
         public int recordnumber = 0;
         public string ID = String.Empty;
         public string FilePath = String.Empty;
@@ -33,6 +35,8 @@ namespace Photo_Tools
         public int DuplicateScore = 0;
         public bool isMonochrome = false;
         public string RGBHash = String.Empty;
-        
+
+
+       
     }
 }

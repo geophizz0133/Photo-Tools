@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace Photo_Tools
 {
-    public class MetadataHandler
+    public class MetadataHandler : IDisposable
     {
         public PhotoData photoData = new PhotoData();
         public MetadataHandler()
@@ -18,6 +18,7 @@ namespace Photo_Tools
             
         }
 
+        public void Dispose() { }
 
         public PhotoData ReadPhoto(string PhotoFileLocation)
         {
@@ -98,6 +99,7 @@ namespace Photo_Tools
 
                     }
                 }
+                this.Dispose();
             GC.Collect();
             return photoData;
         }
@@ -105,6 +107,8 @@ namespace Photo_Tools
         {
             ImageHandler photoHandler = new ImageHandler();
             return photoHandler.IsMonochrome(filePath);
+            photoHandler.Dispose();
+            GC.Collect();
         }
     }
 }

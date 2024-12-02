@@ -20,7 +20,7 @@ try
     dbTester.RunSQLCommand("delete from PhotoList");
 
     //read data from photo files
-    MetadataHandler metadataHandler = new MetadataHandler();
+   // MetadataHandler metadataHandler = new MetadataHandler();
     
     List<PhotoData> photoData = new List<PhotoData>();
 
@@ -34,10 +34,12 @@ try
 
     foreach (var filename in FileFolder.EnumerateFiles())
     {
+        MetadataHandler metadataHandler = new MetadataHandler();
         try
         {
             Console.SetCursorPosition(0,5);
             Console.Write($"Reading {fileLocation}/{fileCount}");
+            Console.SetCursorPosition(0, 6);
             string filePath = filename.FullName.ToString();
             Debug.Print($"Reading {filePath}"); 
             PhotoData photo = metadataHandler.ReadPhoto(filePath);
@@ -49,9 +51,11 @@ try
         }
         catch (Exception)
         {
-           // Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
+            // Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
+            fileLocation++;
         }
-            
+        metadataHandler.Dispose();
+        GC.Collect();
     }
 
    
@@ -70,6 +74,7 @@ try
     Console.WriteLine("Comparison Done");
     Console.WriteLine($"Press any key to quit");Console.Read();
     
+    dbTester.Dispose();
 }
 catch (Exception)
 {

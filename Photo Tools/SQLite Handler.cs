@@ -17,8 +17,10 @@ using System.Collections;
 
 namespace Photo_Tools
 {
-    public class SQLite_Handler
+    public class SQLite_Handler : IDisposable
     {
+        public void Dispose() { }   
+
         public SqliteConnection DBConnection { get; set; }
 
         public SQLite_Handler(string dbLocation = $"D:/Scratch/PhotoTools.db", string SQLscript= $"D:/Scratch/CREATE TABLE PhotoList .txt")
@@ -161,11 +163,14 @@ namespace Photo_Tools
 
                             photoList.Add(subjectPhoto);
                             recordcounter++;
+                        subjectPhoto = null;
+                        GC.Collect();
                         }
 
 
                 }
             }
+            GC.Collect ();
             return photoList;
         }
 
