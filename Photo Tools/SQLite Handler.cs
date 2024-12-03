@@ -217,6 +217,7 @@ namespace Photo_Tools
             {
                 RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
+                //The line above misses some jpg and png originals. Insert call to set jpg and png originals too
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null>0)");
                 RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION', [DUPLICATE_SCORE] = 1 Where INSTR([FILE_PATH],'Version')>0");
             }

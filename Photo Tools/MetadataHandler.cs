@@ -109,7 +109,8 @@ namespace Photo_Tools
         }
         public bool DetermineMonochrome(string filePath)
         {
-            ImageHandler photoHandler = new ImageHandler();
+           // ImageHandler photoHandler = new ImageHandler(); //ImageMagick
+            ImageHandler1 photoHandler = new ImageHandler1(); //ImageSharp
             return photoHandler.IsMonochrome(filePath);
             photoHandler.Dispose();
             GC.Collect();
