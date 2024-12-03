@@ -33,6 +33,7 @@ namespace Photo_Tools
 
                 using (var image = Image.Load<Rgba32>(photoPath))
                 {
+                    int monoColorPixels = 0;
                     for (int y = 0; y < image.Height; y++)
                     {
                         for (int x = 0; x < image.Width; x++)
@@ -40,9 +41,14 @@ namespace Photo_Tools
                             Rgba32 pixel = image[x, y];
                             if (pixel.R != pixel.G || pixel.R != pixel.B)
                             {
-                                isMonochrome = false; // Found a color pixel
+                                monoColorPixels++; // Found a color pixel     
                             }
-                        }
+                            if (monoColorPixels > 0)
+                            {
+                                isMonochrome = false;
+                            }
+
+                            }
                     }
                     isMonochrome = true; // All pixels are monochrome
                 }
