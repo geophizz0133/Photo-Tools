@@ -35,13 +35,15 @@ namespace Photo_Tools
             photoData.isMonochrome = DetermineMonochrome(PhotoFileLocation);
             photoData.RGBHash = String.Empty;
 
-           
-                var directories = ImageMetadataReader.ReadMetadata(PhotoFileLocation);
 
-                //Cycle thru all directories
-                foreach (var directory in directories)
+            var dataTree = ImageMetadataReader.ReadMetadata(PhotoFileLocation);
+            
+
+
+                //Cycle thru all dataTree
+                foreach (var dataBranch in dataTree)
                 {
-                    foreach (var MetadataTag in directory.Tags)
+                    foreach (var MetadataTag in dataBranch.Tags)
                     {
                         switch (MetadataTag.Description)
                         {
@@ -99,8 +101,10 @@ namespace Photo_Tools
 
                     }
                 }
-                this.Dispose();
+            dataTree = null;
+            this.Dispose();
             GC.Collect();
+            GC.WaitForFullGCComplete(); 
             return photoData;
         }
         public bool DetermineMonochrome(string filePath)

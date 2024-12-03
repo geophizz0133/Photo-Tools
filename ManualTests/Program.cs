@@ -34,27 +34,33 @@ try
 
     foreach (var filename in FileFolder.EnumerateFiles())
     {
-        MetadataHandler metadataHandler = new MetadataHandler();
+        
         try
         {
-            Console.SetCursorPosition(0,5);
-            Console.Write($"Reading {fileLocation}/{fileCount}");
-            Console.SetCursorPosition(0, 6);
-            string filePath = filename.FullName.ToString();
-            Debug.Print($"Reading {filePath}"); 
-            PhotoData photo = metadataHandler.ReadPhoto(filePath);
-            dbTester.InsertSinglePhoto(photo);
-            photoData.Add(photo);
             fileLocation++;
-            //photoData.Add(metadataHandler.ReadPhoto(filePath));
-            
+            if (filename.Extension.ToUpper() != ".XMP")
+            {
+                Console.SetCursorPosition(0, 5);
+                Console.Write($"Reading {fileLocation}/{fileCount}");
+                Console.SetCursorPosition(0, 6);
+                string filePath = filename.FullName.ToString();
+                Debug.Print($"Reading {filePath}");
+                MetadataHandler metadataHandler = new MetadataHandler();
+                PhotoData photo = metadataHandler.ReadPhoto(filePath);
+                metadataHandler.Dispose();
+                dbTester.InsertSinglePhoto(photo);
+                //photoData.Add(photo);
+
+                //photoData.Add(metadataHandler.ReadPhoto(filePath));
+            }
         }
         catch (Exception)
         {
             // Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
             fileLocation++;
         }
-        metadataHandler.Dispose();
+        dbTester.Dispose();
+
         GC.Collect();
     }
 
