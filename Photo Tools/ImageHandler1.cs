@@ -14,8 +14,10 @@ namespace Photo_Tools
         /// <returns>True if the image is monochrome, otherwise false.</returns>
         public bool IsMonochrome(string photoPath)
         {
+            bool isMonochrome = false;
             try
             {
+                //If the file is a RAW file, it is always color and does not need to be checked
                 int charIndex = 0;
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("CR2");
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("CR3");
@@ -26,7 +28,7 @@ namespace Photo_Tools
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("XMP");
 
 
-                Debug.Print($"{photoPath}:{charIndex}");
+                //Debug.Print($"{photoPath}:{charIndex}");
                 if (charIndex > 0) { return false; }
 
                 using (var image = Image.Load<Rgba32>(photoPath))
@@ -38,17 +40,18 @@ namespace Photo_Tools
                             Rgba32 pixel = image[x, y];
                             if (pixel.R != pixel.G || pixel.R != pixel.B)
                             {
-                                return false; // Found a color pixel
+                                isMonochrome = false; // Found a color pixel
                             }
                         }
                     }
-                    return true; // All pixels are monochrome
+                    isMonochrome = true; // All pixels are monochrome
                 }
+                return isMonochrome;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
-                return false;
+                return isMonochrome;
             }
         }
         public void Dispose() { }
