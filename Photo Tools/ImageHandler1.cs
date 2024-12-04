@@ -17,7 +17,7 @@ namespace Photo_Tools
             bool isMonochrome = false;
             try
             {
-                //If the file is a RAW file, it is always color and does not need to be checked
+                //If the file is a RAW or Video file, it is always color and does not need to be checked
                 int charIndex = 0;
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("CR2");
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("CR3");
@@ -43,14 +43,17 @@ namespace Photo_Tools
                             {
                                 monoColorPixels++; // Found a color pixel     
                             }
-                            if (monoColorPixels > 0)
-                            {
-                                isMonochrome = false;
-                            }
-
-                            }
+                        }
                     }
-                    isMonochrome = true; // All pixels are monochrome
+
+                    if (monoColorPixels > 100) //If there are more than 100 monochrome pixels it is monochrome
+                    {
+                        isMonochrome = false;
+                    }
+                    else
+                    {
+                        isMonochrome = true; // All pixels are monochrome
+                    }
                 }
                 return isMonochrome;
             }

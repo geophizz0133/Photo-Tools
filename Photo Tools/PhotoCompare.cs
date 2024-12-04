@@ -31,7 +31,7 @@ namespace Photo_Tools
             {
                 Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}");
 
-
+                
                 SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND ([PHOTO_STATUS] is null or ([DUPLICATE_SCORE]<>0 or [DUPLICATE_SCORE] is null))");
                     Console.WriteLine($"PhotoCompare.Compare().GetListOfPhotosFromDB(SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null)");                   
                     Console.WriteLine($" PhotoCompare.Compare() - {SecondaryPhotos.Count} Secondary Photos Retreieved");
