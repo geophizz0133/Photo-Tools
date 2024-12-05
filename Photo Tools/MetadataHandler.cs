@@ -117,7 +117,7 @@ namespace Photo_Tools
             GC.Collect();
         }
 
-        static void CreateSidecarFile(string filePath, string metadata)
+        public void CreateSidecarFile(string filePath, string metadata)
         {
             XDocument doc = new XDocument(
                 new XElement("xmpmeta",
@@ -133,7 +133,7 @@ namespace Photo_Tools
         }
 
 
-        static void UpdateSidecarFile(string filePath, string metadata)
+        public  void UpdateSidecarFile(string filePath, string metadata)
         {
             XDocument doc = XDocument.Load(filePath);
             XElement root = doc.Element("xmpmeta").Element("RDF").Element("Description");

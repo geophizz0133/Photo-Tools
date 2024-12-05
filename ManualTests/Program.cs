@@ -5,6 +5,28 @@ using Microsoft.Data.Sqlite;
 
 Console.WriteLine("Starting Tests");
 
+//Create and/or update a sidecar file
+{
+    string filePath = $"D:/Scratch/photo.xmp";
+    string metadata = "<metadata><title>Test Title</title><description>Test Description</description></metadata>";
+    MetadataHandler xmpHandler = new MetadataHandler();
+
+    if (File.Exists(filePath))
+    {
+        
+        Console.WriteLine("File exists. Updating the file...");
+        xmpHandler.UpdateSidecarFile(filePath, metadata);
+    }
+    else
+    {
+
+
+        Console.WriteLine("File does not exist. Creating a new file...");
+        xmpHandler.CreateSidecarFile(filePath, metadata);
+    }
+
+
+}
 
 try
 {
@@ -20,7 +42,7 @@ try
     dbTester.RunSQLCommand("delete from PhotoList");
 
     //read data from photo files
-   // MetadataHandler metadataHandler = new MetadataHandler();
+   // MetadataHandler xmpHandler = new MetadataHandler();
     
     List<PhotoData> photoData = new List<PhotoData>();
 
@@ -51,7 +73,7 @@ try
                 dbTester.InsertSinglePhoto(photo);
                 //photoData.Add(photo);
 
-                //photoData.Add(metadataHandler.ReadPhoto(filePath));
+                //photoData.Add(xmpHandler.ReadPhoto(filePath));
             }
         }
         catch (Exception)
