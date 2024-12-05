@@ -92,7 +92,7 @@ namespace Photo_Tools
                                     if (SecondPhoto.DateCaptured == OriginalPhoto.DateCaptured) { counter++; }
                                     if (SecondPhoto.Extension == OriginalPhoto.Extension) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
-                                    if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight) { counter++; }
+                                    if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth) { counter++; }
                                     //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }      
                                     if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter = 1; }//If one is in Mono, it is a version
                                     if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version

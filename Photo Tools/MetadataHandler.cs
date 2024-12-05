@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using System.ComponentModel.Design;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
+using System.Xml.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -115,5 +116,31 @@ namespace Photo_Tools
             photoHandler.Dispose();
             GC.Collect();
         }
+
+        static void CreateSidecarFile(string filePath, string metadata)
+        {
+            XDocument doc = new XDocument(
+                new XElement("xmpmeta",
+                    new XElement("RDF",
+                        new XElement("Description",
+                            XElement.Parse(metadata)
+                        )
+                    )
+                )
+            );
+            doc.Save(filePath);
+            Console.WriteLine("Sidecar file created successfully.");
+        }
+
+
+        static void UpdateSidecarFile(string filePath, string metadata)
+        {
+            XDocument doc = XDocument.Load(filePath);
+            XElement root = doc.Element("xmpmeta").Element("RDF").Element("Description");
+            root.ReplaceWith(XElement.Parse(metadata));
+            doc.Save(filePath);
+            Console.WriteLine("Sidecar file updated successfully.");
+        }
+
     }
 }
