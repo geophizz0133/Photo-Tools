@@ -5,7 +5,7 @@ using Microsoft.Data.Sqlite;
 
 Console.WriteLine("Starting Tests");
 
-//Create and/or update a sidecar file
+//Create and/or update a sidecar file (I don't know if this writes a properly formatted XMP file)
 {
     string filePath = $"D:/Scratch/photo.xmp";
     string metadata = "<metadata><title>Test Title</title><description>Test Description</description></metadata>";
