@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Data.Sqlite;
 
+Console.Clear();
 Console.WriteLine("Starting Tests");
 /*
 //Create and/or update a sidecar file (I don't know if this writes a properly formatted XMP file)
@@ -90,7 +91,7 @@ try
   
 
     //Update the file prefix field in the DB (It is faster than doing it in c#)
-    Console.WriteLine("Updating Low Hanging Fruit");
+    Console.WriteLine("Applying Pre Processing Corrections");
     dbTester.UpdateLowHangingFruit();
 
     Console.WriteLine("Retrieving Originals");
@@ -100,7 +101,11 @@ try
     PhotoCompare RunCompare = new PhotoCompare();
     RunCompare.Compare();
     Console.WriteLine("Comparison Done");
-    Console.WriteLine($"Press any key to quit");Console.Read();
+
+    Console.WriteLine("Applying Post Processing Corrections");
+    dbTester.FixJPGOriginals();
+
+    Console.WriteLine($"DONE - Press any key to quit");Console.Read();
     
     dbTester.Dispose();
 }
