@@ -4,11 +4,11 @@ using System.Diagnostics;
 using Microsoft.Data.Sqlite;
 
 Console.WriteLine("Starting Tests");
-
+/*
 //Create and/or update a sidecar file (I don't know if this writes a properly formatted XMP file)
 {
     string filePath = $"D:/Scratch/photo.xmp";
-    string metadata = "<metadata><title>Test Title</title><description>Test Description</description></metadata>";
+    string metadata = "<metadata><title>Test Title</title><description>Test Description Update</description></metadata>";
     MetadataHandler xmpHandler = new MetadataHandler();
 
     if (File.Exists(filePath))
@@ -27,7 +27,7 @@ Console.WriteLine("Starting Tests");
 
 
 }
-
+*/
 try
 {
 //Establish database connection or create the DB if it doesn't exist

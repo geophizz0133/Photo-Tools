@@ -113,7 +113,6 @@ namespace Photo_Tools
            // ImageHandler photoHandler = new ImageHandler(); //ImageMagick
             ImageHandler1 photoHandler = new ImageHandler1(); //ImageSharp
             return photoHandler.IsMonochrome(filePath);
-            photoHandler.Dispose();
             GC.Collect();
         }
 
@@ -137,9 +136,14 @@ namespace Photo_Tools
         {
             XDocument doc = XDocument.Load(filePath);
             XElement root = doc.Element("xmpmeta").Element("RDF").Element("Description");
-            root.ReplaceWith(XElement.Parse(metadata));
-            doc.Save(filePath);
-            Console.WriteLine("Sidecar file updated successfully.");
+            if (root != null)
+            {
+                root.ReplaceWith(XElement.Parse(metadata));
+                doc.Save(filePath);
+                Console.WriteLine("Sidecar file updated successfully.");
+            }
+            else {Console.WriteLine(doc.Elements(metadata)); }   
+
         }
 
     }

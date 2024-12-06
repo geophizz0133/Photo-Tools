@@ -218,15 +218,27 @@ namespace Photo_Tools
                 RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
                 RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select DISTINCT FIRST_VALUE(FILE_PATH) OVER (PARTITION BY FILE_PREFIX ORDER BY FILE_PATH) as [DESIGNATED_ORIGINAL]from PhotoList)");
-                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null>0)");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] >3 Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null)");
                 RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION', [DUPLICATE_SCORE] = 1 Where INSTR([FILE_PATH],'Version')>0");
+
+
             }
             catch (Exception e)
             {
                 Console.Write(e.ToString());
                 throw;
             }
-           
+
+            PublicKey void FixJPGOriginals()
+            {
+                //Reset JPG originals as ORIGINAL and the JPG of a RAW-JPG pair as VERSION
+                //Look at vw_DISTINCT_JPG and vw_DISTINCT_ORIGINAL (Match on [EXIF_DATE_CAPTURED])
+                //If a RAW file exists for the same filename, set the status to VERSION
+                //IF a RAW file does not exist, set the status to ORIGINAL
+                Console.WriteLine($"Fixing erroneous PNG/JPG pairs");
+                RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [JPG_ORIGINAL] from vw_ORIGINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
+                RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1, [PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] from vw_OrIgINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
+
+            }
         }
-    }
 }

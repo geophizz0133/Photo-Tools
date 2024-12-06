@@ -24,17 +24,16 @@ namespace Photo_Tools
         {
             int counter = 0;
 
-            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)"); //This simply gets all files
+            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] FROM vw_DISTINCT_ORIGINALS)"); //This simply gets all files
             Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
     
             foreach (PhotoData OriginalPhoto in OriginalPhotos)
             {
-                Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}");
+                Console.Write($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}:    ");
 
+                SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"Select * from PhotoList where [FILE_PATH] not in(Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_ORIGINALS) AND PHOTO_STATUS is null");  //this pulls the rest of the images
                 
-                SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND ([PHOTO_STATUS] is null or ([DUPLICATE_SCORE]<>0 or [DUPLICATE_SCORE] is null))");
-                    Console.WriteLine($"PhotoCompare.Compare().GetListOfPhotosFromDB(SELECT * from PhotoList WHERE [FILE_PREFIX]='{OriginalPhoto.FilePrefix}' AND [PHOTO_STATUS] is null)");                   
-                    Console.WriteLine($" PhotoCompare.Compare() - {SecondaryPhotos.Count} Secondary Photos Retreieved");
+                    Console.WriteLine($"- {SecondaryPhotos.Count} Secondary Photos Retreieved");
                 
                     foreach (PhotoData SecondPhoto in SecondaryPhotos)
                     {
@@ -50,6 +49,7 @@ namespace Photo_Tools
                                 {
                                     //This makes the math work
                                     counter = 3;
+
                                     //Skip MOV screenshots
                                     if(OriginalPhoto.Extension.ToLower() == ".mov" && SecondPhoto.Extension.ToLower() == ".png"){ break; } //Skip it because it is a png screenshot of an mov and width/height of the .mov can't be evaluated
                                     
@@ -85,7 +85,10 @@ namespace Photo_Tools
                                 break;
                                 }
                                 default:
-                                {   //If all 4 of these properties match, the SecondPhoto is a duplicate
+                                {
+                                if ((SecondPhoto.DateCaptured != OriginalPhoto.DateCaptured)) { break; } //The photos are unrelated
+                                    
+                                    //If all 4 of these properties match, the SecondPhoto is a duplicate
                                     //If the software is different, it means the photo has been edited and is a version
                                     counter = 1;
                                     
@@ -95,7 +98,8 @@ namespace Photo_Tools
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth) { counter++; }
                                     //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }      
                                     if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter = 1; }//If one is in Mono, it is a version
-                                    if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version
+                                    if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Dbifferent software with all else the same is always a version
+                                    if (SecondPhoto.FilePath.ToUpper().Contains("VERSION")) {  counter = 1; } //The fact that it is a version is distinctly called out
                                     break;
                                 }
                         }
