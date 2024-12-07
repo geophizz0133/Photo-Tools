@@ -24,7 +24,7 @@ namespace Photo_Tools
         {
             int counter = 0;
 
-            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] FROM vw_DISTINCT_ORIGINALS)"); //This simply gets all files
+            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] FROM vw_DISTINCT_ORIGINALS)");
             Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
     
             foreach (PhotoData OriginalPhoto in OriginalPhotos)

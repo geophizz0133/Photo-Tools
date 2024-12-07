@@ -5,34 +5,11 @@ using Microsoft.Data.Sqlite;
 
 Console.Clear();
 Console.WriteLine("Starting Tests");
-/*
-//Create and/or update a sidecar file (I don't know if this writes a properly formatted XMP file)
-{
-    string filePath = $"D:/Scratch/photo.xmp";
-    string metadata = "<metadata><title>Test Title</title><description>Test Description Update</description></metadata>";
-    MetadataHandler xmpHandler = new MetadataHandler();
 
-    if (File.Exists(filePath))
-    {
-        
-        Console.WriteLine("File exists. Updating the file...");
-        xmpHandler.UpdateSidecarFile(filePath, metadata);
-    }
-    else
-    {
-
-
-        Console.WriteLine("File does not exist. Creating a new file...");
-        xmpHandler.CreateSidecarFile(filePath, metadata);
-    }
-
-
-}
-*/
 try
 {
 //Establish database connection or create the DB if it doesn't exist
-	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/CREATE TABLE PhotoList .txt");
+	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/Create_PhotoTools DB.sql");
 	Console.WriteLine("Connecting with specific location and SQL Code - Works");
 
   
