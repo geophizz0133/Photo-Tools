@@ -237,6 +237,7 @@ namespace Photo_Tools
             RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [JPG_ORIGINAL] from vw_ORIGINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
             RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1, [PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] from vw_OrIgINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
             RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' Where [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
+            RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [EXIF_SOFTWARE] in (Select [SOFTWARE] from SOFTWARE_LOOKUP)");
         }
     }
 }

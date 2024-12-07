@@ -33,7 +33,7 @@ namespace Photo_Tools
 
                 SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"Select * from PhotoList where [FILE_PATH] not in(Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_ORIGINALS) AND PHOTO_STATUS is null");  //this pulls the rest of the images
                 
-                    Console.WriteLine($"- {SecondaryPhotos.Count} Secondary Photos Retreieved");
+                    //Console.WriteLine($"- {SecondaryPhotos.Count} Secondary Photos Retreieved");
                 
                     foreach (PhotoData SecondPhoto in SecondaryPhotos)
                     {

@@ -61,7 +61,7 @@ try
         try
         {
             fileLocation++;
-            if (filename.Extension.ToUpper() != ".XMP")
+            if (filename.Extension.ToUpper() != ".XMP" || filename.Extension.ToUpper() !=".DB")
             {
                 Console.SetCursorPosition(0, 5);
                 Console.Write($"Reading {fileLocation}/{fileCount}");
@@ -72,14 +72,11 @@ try
                 PhotoData photo = metadataHandler.ReadPhoto(filePath);
                 metadataHandler.Dispose();
                 dbTester.InsertSinglePhoto(photo);
-                //photoData.Add(photo);
-
-                //photoData.Add(xmpHandler.ReadPhoto(filePath));
             }
         }
         catch (Exception)
         {
-            // Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
+            Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
             fileLocation++;
         }
         dbTester.Dispose();

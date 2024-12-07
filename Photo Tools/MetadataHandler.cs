@@ -113,7 +113,6 @@ namespace Photo_Tools
            // ImageHandler photoHandler = new ImageHandler(); //ImageMagick
             ImageHandler1 photoHandler = new ImageHandler1(); //ImageSharp
             return photoHandler.IsMonochrome(filePath);
-            GC.Collect();
         }
 
         public void CreateSidecarFile(string filePath, string metadata)
