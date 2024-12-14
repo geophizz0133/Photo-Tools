@@ -6,7 +6,13 @@ using Microsoft.Data.Sqlite;
 Console.Clear();
 Console.WriteLine("Starting Tests");
 
-try
+MetadataHandler metadataHandler = new MetadataHandler();    
+metadataHandler.ReadSidecarFile($"D:/Scratch/2023-01-078 (IMG_8946).JPG");
+
+Console.Write($"Stop Here"); Console.Read();
+
+
+/*try
 {
 //Establish database connection or create the DB if it doesn't exist
 	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/Create_PhotoTools DB.sql");
@@ -19,8 +25,7 @@ try
     Console.WriteLine("Clearing the database");
     dbTester.RunSQLCommand("delete from PhotoList");
 
-    //read data from photo files
-   // MetadataHandler xmpHandler = new MetadataHandler();
+
     
     List<PhotoData> photoData = new List<PhotoData>();
 
@@ -89,5 +94,5 @@ catch (Exception)
     Console.WriteLine("Connecting with specific location and SQL Code - FAILED");
     throw;
 }
-
+*/
 

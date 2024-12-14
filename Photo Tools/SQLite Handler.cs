@@ -139,7 +139,6 @@ namespace Photo_Tools
             {
                 DBConnection.Open();
                 using (var photoReader = command.ExecuteReader())
-
                 {
                     int recordcounter = 0;
                     while (photoReader.Read())

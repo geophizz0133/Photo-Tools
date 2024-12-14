@@ -8,6 +8,10 @@ using System.Xml.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Metadata;
+using XmpCore;
+
 
 namespace Photo_Tools
 {
@@ -115,33 +119,20 @@ namespace Photo_Tools
             return photoHandler.IsMonochrome(filePath);
         }
 
+        public void ReadSidecarFile(string filePath)
+        {
+           
+        }
+
         public void CreateSidecarFile(string filePath, string metadata)
         {
-            XDocument doc = new XDocument(
-                new XElement("xmpmeta",
-                    new XElement("RDF",
-                        new XElement("Description",
-                            XElement.Parse(metadata)
-                        )
-                    )
-                )
-            );
-            doc.Save(filePath);
-            Console.WriteLine("Sidecar file created successfully.");
+
+
         }
 
 
         public  void UpdateSidecarFile(string filePath, string metadata)
         {
-            XDocument doc = XDocument.Load(filePath);
-            XElement root = doc.Element("xmpmeta").Element("RDF").Element("Description");
-            if (root != null)
-            {
-                root.ReplaceWith(XElement.Parse(metadata));
-                doc.Save(filePath);
-                Console.WriteLine("Sidecar file updated successfully.");
-            }
-            else {Console.WriteLine(doc.Elements(metadata)); }   
 
         }
 
