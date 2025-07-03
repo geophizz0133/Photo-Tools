@@ -90,7 +90,7 @@ namespace Photo_Tools
                 try
                 {
                     InsertCommand.Connection = DBConnection;
-                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_CAMERA_MODEL, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE,FILE_SIZE, EXIF_WIDTH, EXIF_HEIGHT, EXIF_FULL_IMAGE_SIZE,DATE_LAST_MODIFIED,PHOTO_IS_MONOCHROME) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.CameraModel}\",\"{photoData.FocalLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\",\"{photoData.FileSize}\",\"{photoData.ImageHeight}\",\"{photoData.ImageWidth}\",\"{photoData.FullImageSize}\",\"{photoData.DateLastModified}\",{photoData.isMonochrome})");
+                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_CAMERA_MODEL, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE,FILE_SIZE, EXIF_WIDTH, EXIF_HEIGHT, EXIF_FULL_IMAGE_SIZE,DATE_LAST_MODIFIED,PHOTO_IS_MONOCHROME,PHOTO_IS_RAW) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.CameraModel}\",\"{photoData.FocalLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\",\"{photoData.FileSize}\",\"{photoData.ImageHeight}\",\"{photoData.ImageWidth}\",\"{photoData.FullImageSize}\",\"{photoData.DateLastModified}\",\"{photoData.isMonochrome}\",\"{photoData.isRaw}\")");
                     Debug.Print(InsertCommand.CommandText);
 
                     try
@@ -136,29 +136,33 @@ namespace Photo_Tools
 
             using (SqliteCommand command = new SqliteCommand(SQLcommand, DBConnection))
 
+
             {
+                Debug.Print(command.CommandText);
                 DBConnection.Open();
-                using (var photoReader = command.ExecuteReader())
+                using (var photoDbReader = command.ExecuteReader())
                 {
                     int recordcounter = 0;
-                    while (photoReader.Read())
+                    while (photoDbReader.Read())
                     {
                         PhotoData subjectPhoto = new PhotoData();
 
                         subjectPhoto.recordnumber = recordcounter;
-                        subjectPhoto.ID = photoReader.GetString(photoReader.GetOrdinal("ID"));
-                        subjectPhoto.Extension = photoReader.GetString(photoReader.GetOrdinal("FILE_EXT"));
-                        subjectPhoto.FileName = photoReader.GetString(photoReader.GetOrdinal("FILE_PATH"));
-                        subjectPhoto.FilePath = photoReader.GetString(photoReader.GetOrdinal("FILE_NAME"));
-                        subjectPhoto.DateCaptured = photoReader.GetString(photoReader.GetOrdinal("EXIF_DATE_CAPTURED"));
-                        subjectPhoto.Software = photoReader.GetString(photoReader.GetOrdinal("EXIF_SOFTWARE"));
-                        subjectPhoto.ImageWidth = photoReader.GetString(photoReader.GetOrdinal("EXIF_WIDTH"));
-                        subjectPhoto.ImageHeight = photoReader.GetString(photoReader.GetOrdinal("EXIF_HEIGHT"));
-                        subjectPhoto.CameraMake = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MAKE"));
-                        subjectPhoto.CameraModel = photoReader.GetString(photoReader.GetOrdinal("EXIF_CAMERA_MODEL"));
-                        subjectPhoto.FilePrefix = photoReader.GetString(photoReader.GetOrdinal("FILE_PREFIX"));
-                        subjectPhoto.isMonochrome = photoReader.GetBoolean(photoReader.GetOrdinal("PHOTO_IS_MONOCHROME"));
-                        //subjectPhoto.RGBHash = photoReader.GetString(photoReader.GetOrdinal("PHOTO_RGB_HASH"));
+                        subjectPhoto.ID = photoDbReader.GetString(photoDbReader.GetOrdinal("ID"));
+                        subjectPhoto.Extension = photoDbReader.GetString(photoDbReader.GetOrdinal("FILE_EXT"));
+                        subjectPhoto.FileName = photoDbReader.GetString(photoDbReader.GetOrdinal("FILE_PATH"));
+                        subjectPhoto.FilePath = photoDbReader.GetString(photoDbReader.GetOrdinal("FILE_NAME"));
+                        subjectPhoto.DateCaptured = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_DATE_CAPTURED"));
+                        subjectPhoto.DateLastModified = photoDbReader.GetString(photoDbReader.GetOrdinal("DATE_LAST_MODIFIED"));
+                        subjectPhoto.Software = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_SOFTWARE"));
+                        subjectPhoto.ImageWidth = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_WIDTH"));
+                        subjectPhoto.ImageHeight = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_HEIGHT"));
+                        subjectPhoto.CameraMake = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_CAMERA_MAKE"));
+                        subjectPhoto.CameraModel = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_CAMERA_MODEL"));
+                        subjectPhoto.FilePrefix = photoDbReader.GetString(photoDbReader.GetOrdinal("FILE_PREFIX"));
+                        subjectPhoto.isMonochrome = photoDbReader.GetBoolean(photoDbReader.GetOrdinal("PHOTO_IS_MONOCHROME"));
+                        subjectPhoto.isRaw = photoDbReader.GetBoolean(photoDbReader.GetOrdinal("PHOTO_IS_RAW"));
+                        //subjectPhoto.RGBHash = photoDbReader.GetString(photoDbReader.GetOrdinal("PHOTO_RGB_HASH"));
 
                         photoList.Add(subjectPhoto);
                         recordcounter++;
@@ -215,28 +219,33 @@ namespace Photo_Tools
             try
             {
                 RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
-                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
-                RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select DISTINCT FIRST_VALUE(FILE_PATH) OVER (PARTITION BY FILE_PREFIX ORDER BY FILE_PATH) as [DESIGNATED_ORIGINAL]from PhotoList)");
-                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in('.CR2','.ARW','RW2','CR3') AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null)");
+                //RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in (SELECT [FORMAT] FROM Lookup_RAW_Formats)");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL',[DUPLICATE_SCORE] = 0 WHERE [PHOTO_IS_RAW] = 'True'");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'JPG ORIGINAL',[DUPLICATE_SCORE] = 0 WHERE [FILE_EXT] = '.JPG'");
+                // RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 where [FILE_PATH] in (SELECT DISTINCT [DESIGNATED_ORIGINAL] FROM vw_ALL_ORIGINALS)");
+                //RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select DISTINCT FIRST_VALUE(FILE_PATH) OVER (PARTITION BY FILE_PREFIX ORDER BY FILE_PATH) as [DESIGNATED_ORIGINAL]from PhotoList)");
+                RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in ('.jpg','.JPG') and [PHOTO_IS_RAW] = 'False' AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null)");
                 RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION', [DUPLICATE_SCORE] = 1 Where INSTR([FILE_PATH],'Version')>0");
 
 
             }
             catch (Exception e)
             {
-                Console.Write(e.ToString());
+                Console.WriteLine($"Error: e.ToString()");
                 throw;
             }
 
         }
         public void FixJPGOriginals() //Post Processing Corrections
         {
+            //NOTE FOR LATER - This may no longer be needed as JPG Originals are designated in FixLowHangingFruit
 
-            Console.WriteLine($"Applying Post Processing Corrections");
-            RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [JPG_ORIGINAL] from vw_ORIGINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
-            RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1, [PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] from vw_OrIgINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
-            RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' Where [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
-            RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [EXIF_SOFTWARE] in (Select [SOFTWARE] from SOFTWARE_LOOKUP)");
+            //Console.WriteLine($"Applying Post Processing Corrections");
+            //RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [JPG_ORIGINAL] from vw_ORIGINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
+            //RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1, [PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] from vw_OrIgINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
+            //RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' Where [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
+            //RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [EXIF_SOFTWARE] in (Select [SOFTWARE] from SOFTWARE_LOOKUP)");
         }
     }
 }

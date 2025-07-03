@@ -9,18 +9,10 @@ using XmpCore;
 
 namespace Photo_Tools
 {
-    internal class XMPHandler
+    public class XMPHandler
+    
     {
-        using System;
-using System.IO;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using XmpCore;
 
-namespace ImageProcessing
-    {
-        public class XmpHandler
-        {
             /// <summary>
             /// Writes XMP data to a sidecar file.
             /// </summary>
@@ -29,12 +21,12 @@ namespace ImageProcessing
             /// <param name="value">The value of the XMP property.</param>
             public void WriteXmpData(string filePath, string property, string value)
             {
-                XmpMeta xmpMeta = new XmpMeta();
-                xmpMeta.SetProperty(XmpConstants.NsDc, property, value);
+                var xmpMeta = new XmpMeta();
+                xmpMeta.SetProperty(XmpConstants.NsDC, property, value);
 
-                using (StreamWriter writer = new StreamWriter(filePath))
+                using (var writer = new StreamWriter(filePath))
                 {
-                    writer.Write(xmpMeta.SerializeToString(new SerializeOptions()));
+                    XmpMetaFactory.Serialize(xmpMeta, writer.BaseStream, new SerializeOptions());
                 }
             }
 
@@ -48,17 +40,22 @@ namespace ImageProcessing
             {
                 try
                 {
-                    using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     {
-                        var parser = XmpMetaFactory.Parse(stream);
-                        return parser.GetPropertyString(XmpConstants.NsDc, property);
+                        var xmpMeta = XmpMetaFactory.Parse(stream);
+                        return xmpMeta.GetPropertyString(XmpConstants.NsDC, property);
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error reading XMP data: {ex.Message}");
-                    return null;
+                    throw;
                 }
+            }
+
+            public void UpdateXmpData(string filePath, string property, string newValue)
+            {
+                UpdateXmpData(filePath, property, newValue);
             }
 
             /// <summary>
@@ -67,21 +64,22 @@ namespace ImageProcessing
             /// <param name="filePath">The path to the XMP sidecar file.</param>
             /// <param name="property">The XMP property to update.</param>
             /// <param name="newValue">The new value of the XMP property.</param>
-            public void UpdateXmpData(string filePath, string property, string newValue)
+            public void UpdateXmpData(string filePath, string property, string newValue, StreamWriter writer)
             {
                 try
                 {
                     XmpMeta xmpMeta;
-                    using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     {
                         xmpMeta = (XmpMeta)XmpMetaFactory.Parse(stream);
                     }
 
-                    xmpMeta.SetProperty(XmpConstants.NsDc, property, newValue);
+                    xmpMeta.SetProperty(XmpConstants.NsDC, property, newValue);
 
-                    using (StreamWriter writer = new StreamWriter(filePath))
+                    using (var rdfWriter = new StreamWriter(filePath))
                     {
-                        writer.Write(xmpMeta.SerializeToString(new SerializeOptions()));
+                        //Stream rdfStream = rdfWriter.Write(rdfWriter.ToString());   
+                        XmpMetaFactory.Serialize(xmpMeta, rdfWriter.BaseStream, new SerializeOptions());
                     }
                 }
                 catch (Exception ex)
@@ -92,5 +90,4 @@ namespace ImageProcessing
         }
     }
 
-}
-}
+

@@ -39,6 +39,7 @@ namespace Photo_Tools
             photoData.FileSize = fileInfo.Length.ToString();
             photoData.isMonochrome = DetermineMonochrome(PhotoFileLocation);
             photoData.RGBHash = String.Empty;
+            photoData.isRaw = DetermineRAW(PhotoFileLocation);
 
 
             var dataTree = ImageMetadataReader.ReadMetadata(PhotoFileLocation);
@@ -119,22 +120,9 @@ namespace Photo_Tools
             return photoHandler.IsMonochrome(filePath);
         }
 
-        public void ReadSidecarFile(string filePath)
-        {
-           
-        }
-
-        public void CreateSidecarFile(string filePath, string metadata)
-        {
-
-
-        }
-
-
-        public  void UpdateSidecarFile(string filePath, string metadata)
-        {
-
-        }
+        public bool DetermineRAW(string filePath)
+        { ImageHandler1 photoHandler = new ImageHandler1();
+        return photoHandler.IsRAW(filePath);}
 
     }
 }

@@ -6,13 +6,40 @@ using Microsoft.Data.Sqlite;
 Console.Clear();
 Console.WriteLine("Starting Tests");
 
-MetadataHandler metadataHandler = new MetadataHandler();    
-metadataHandler.ReadSidecarFile($"D:/Scratch/2023-01-078 (IMG_8946).JPG");
 
+/*
+// Path to your image file and sidecar file
+string imagePath = "path/to/your/photo.jpg";
+string sidecarPath = "path/to/your/photo.xmp";
+
+// Create an instance of XmpHandler
+XmpHandler xmpHandler = new XmpHandler();
+
+// Write XMP data
+xmpHandler.WriteXmpData(sidecarPath, "dc:title", "My Photo Title");
+
+// Read XMP data
+string title = xmpHandler.ReadXmpData(sidecarPath, "dc:title");
+Console.WriteLine($"Title: {title}");
+
+// Update XMP data
+xmpHandler.UpdateXmpData(sidecarPath, "dc:title", "Updated Photo Title");
+
+// Read XMP data again to confirm update
+title = xmpHandler.ReadXmpData(sidecarPath, "dc:title");
+Console.WriteLine($"Updated Title: {title}");
+*/
+/*
+XMPHandler xmpHandler = new XMPHandler();
+string filePath = (@"D://Scratch//PhotoTools Samples//PhotoSampleData//DSC00003-19643.xmp");
+FileInfo fileInfo = new FileInfo(filePath);
+string XMPData = xmpHandler.ReadXmpData(filePath, "tiff:Make");
+Console.WriteLine(XMPData);
 Console.Write($"Stop Here"); Console.Read();
 
+*/
 
-/*try
+try
 {
 //Establish database connection or create the DB if it doesn't exist
 	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/Create_PhotoTools DB.sql");
@@ -32,7 +59,7 @@ Console.Write($"Stop Here"); Console.Read();
     Console.WriteLine("Cataloging Photos");
 
 
-    DirectoryInfo FileFolder = new DirectoryInfo(@"Q:/Photo Library/2014/2014-12");
+    DirectoryInfo FileFolder = new DirectoryInfo(@"D://Scratch//PhotoTools Samples//PhotoSampleData");
     Console.WriteLine("Starting folder scan:");
     int fileLocation = 0;
     int fileCount = FileFolder.EnumerateFileSystemInfos().Count();
@@ -94,5 +121,5 @@ catch (Exception)
     Console.WriteLine("Connecting with specific location and SQL Code - FAILED");
     throw;
 }
-*/
+
 

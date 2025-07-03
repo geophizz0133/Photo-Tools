@@ -59,9 +59,25 @@ namespace Photo_Tools
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine($"IsMonochrome - An error occurred: {ex.Message}");
                 return isMonochrome;
             }
+        }
+        public bool IsRAW(string photoPath) 
+            //Video files are counted as RAW to exlude them from processing because they have funky metadata that screws things up
+        {
+            
+            int charIndex = 0;
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("CR2");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("CR3");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("ARW");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("MOV");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("MP4");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("RW2");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("XMP");
+
+            if (charIndex > 0) { return true; }
+            return false;
         }
         public void Dispose() { }
     }

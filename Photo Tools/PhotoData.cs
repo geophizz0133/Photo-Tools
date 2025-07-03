@@ -35,8 +35,7 @@ namespace Photo_Tools
         public int DuplicateScore = 0;
         public bool isMonochrome = false;
         public string RGBHash = String.Empty;
-
-
+        public bool isRaw = false; 
        
     }
 }
