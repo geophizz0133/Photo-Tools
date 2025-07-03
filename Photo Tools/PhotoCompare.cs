@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -20,26 +21,45 @@ namespace Photo_Tools
 
 
 
-        public void Compare()
+        public void Compare(string? OriginalType = "RAW")
         {
+            string secondaryPhotosSQL = string.Empty;
             int counter = 0;
-
-            OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_ORIGINALS");
-            //OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from PhotoList WHERE [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] FROM vw_DISTINCT_ORIGINALS)");
-            Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
-    
+            switch (OriginalType)
+            {
+                case ("RAW"):
+                    { 
+                        OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_ORIGINALS");
+                        secondaryPhotosSQL = $"Select * from PhotoList where [FILE_NAME] not in(Select [DESIGNATED_ORIGINAL] from vw_DESIGNATED_ORIGINALS) AND [PHOTO_STATUS] is null";
+                        Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
+                        break;
+                     }
+                case ("jpg"): //Edited jpg
+                    {
+                        OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_jpg_COPIES");
+                        secondaryPhotosSQL = "";
+                        break;
+                    }
+                case ("png"):
+                    {
+                        OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_png_COPIES");
+                        break;
+                    }
+            }
             foreach (PhotoData OriginalPhoto in OriginalPhotos)
             {
-               // Console.Write($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}:    ");
+                Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}:    ");
 
-                SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"Select * from PhotoList where [FILE_PATH] not in(Select [DESIGNATED_ORIGINAL] from vw_DESIGNATED_ORIGINALS) AND [PHOTO_STATUS] is null");  //this pulls the rest of the images
-                //SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"Select * from PhotoList where [FILE_PATH] not in(Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_ORIGINALS) AND PHOTO_STATUS is null");  //this pulls the rest of the images
-                                                                                                                                                                                                                //Console.WriteLine($"- {SecondaryPhotos.Count} Secondary Photos Retreieved");
+               // SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"Select * from PhotoList where [FILE_PATH] not in(Select [DESIGNATED_ORIGINAL] from vw_DESIGNATED_ORIGINALS) AND [PHOTO_STATUS] is null");  //this pulls the rest of the images that have not been previously designated
+                SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB(secondaryPhotosSQL);
+                //Console.WriteLine($"- {SecondaryPhotos.Count} Secondary Photos Retreieved");
 
                 foreach (PhotoData SecondPhoto in SecondaryPhotos)
                     {
                         Debug.Print($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
                         Console.WriteLine($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
+                    if (SecondPhoto.FileName == "Tower of London SIMILAR_TEST_VESRION_2.tif") 
+                    { Console.WriteLine("Errant Photo"); }
                     switch (SecondPhoto.Extension.ToLower())
                         {
                         case (".mov"):
@@ -49,18 +69,11 @@ namespace Photo_Tools
                         case (".png"): //PNG files have little metadata so only the image height and width can be compared
                                 {
                                     //This makes the math work
-                                    counter = 2;
+                                    counter = 3;
 
                                     //Skip MOV screenshots
                                     if(OriginalPhoto.Extension.ToLower() == ".mov" && SecondPhoto.Extension.ToLower() == ".png"){ break; } //Skip it because it is a png screenshot of an mov and width/height of the .mov can't be evaluated
                                     
-                                    Debug.Print($"OriginalPhoto {OriginalPhoto.Extension.ToLower()} - {OriginalPhoto.Extension.ToLower() != ".mov"}");
-                                    Debug.Print($"OriginalPhoto {OriginalPhoto.Extension.ToLower()} - {OriginalPhoto.Extension.ToLower() != ".mp4"}");
-                                    Debug.Print($"SecondPhoto {SecondPhoto.Extension.ToLower()} - {SecondPhoto.Extension.ToLower() != ".mov"}");
-                                    Debug.Print($"SecondPhoto {SecondPhoto.Extension.ToLower()} - {SecondPhoto.Extension.ToLower() != ".mp4"}");
-                                    Debug.Print($"If any of the above is true, this code should not execute");
-
-                                    Debug.Print($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
                                 
                                 //If the height and width do not match the original, it is a version
                                 //Sometimes a png file mixes up the height and width values so it has to be checked against both
@@ -89,22 +102,28 @@ namespace Photo_Tools
                                 }
                                 default: //All other file types
                                 {
-                                if ((SecondPhoto.DateCaptured != OriginalPhoto.DateCaptured)) { break; } //The photos are unrelated
+                                
+                                    if ((SecondPhoto.DateCaptured != OriginalPhoto.DateCaptured)) 
+                                    { counter = 1;
+                                    break; 
+                                    } //The photos are unrelated
                                     
                                     //If all 5 of these properties match, the SecondPhoto is a duplicate
                                     //If the software is different, it means the photo has been edited and is a version
-                                    counter = 1;
+                                    counter = 0;
                                    
                                     if (SecondPhoto.DateCaptured == OriginalPhoto.DateCaptured) { counter++; }
-                                    if (SecondPhoto.DateLastModified == OriginalPhoto.DateLastModified) { counter++; }
                                     if (SecondPhoto.Extension == OriginalPhoto.Extension) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth) { counter++; }
-                                    //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
-                                    
-                                    //Criteria causing hard resets of the Duplicate score
-                                    if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter = 1; }//If one is in Mono, it is a version
-                                    if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Dbifferent software with all else the same is always a version
+                                //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
+
+                                //Criteria causing subtractions from the counter
+                                    if (SecondPhoto.DateLastModified != OriginalPhoto.DateLastModified) { counter--; }
+
+                                //Criteria causing hard resets of the Duplicate score
+                                if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter = 1; }//If one is in Mono, it is a version
+                                    if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version
                                     if (SecondPhoto.FilePath.ToUpper().Contains("VERSION")) {  counter = 1; } //The fact that it is a version is distinctly called out
                                     break;
                                 }

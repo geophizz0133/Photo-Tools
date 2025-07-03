@@ -26,6 +26,7 @@ namespace Photo_Tools
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("MP4");
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("RW2");
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("XMP");
+                charIndex = charIndex + photoPath.ToUpper().IndexOf("DB");
 
 
                 //Debug.Print($"{photoPath}:{charIndex}");
