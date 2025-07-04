@@ -74,7 +74,9 @@ namespace Photo_Tools
             int charIndex = 0;
             charIndex = charIndex + photoPath.ToUpper().IndexOf("CR2");
             charIndex = charIndex + photoPath.ToUpper().IndexOf("CR3");
-            charIndex = charIndex + photoPath.ToUpper().IndexOf("ARW");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("ARW"); //Some DSLR captured film photos retain ARW in their names even though they are saved as tiff so they get marked as originals - I'm ok with that
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("DNG");
+            charIndex = charIndex + photoPath.ToUpper().IndexOf("HEIF");
             charIndex = charIndex + photoPath.ToUpper().IndexOf("MOV");
             charIndex = charIndex + photoPath.ToUpper().IndexOf("MP4");
             charIndex = charIndex + photoPath.ToUpper().IndexOf("RW2");
