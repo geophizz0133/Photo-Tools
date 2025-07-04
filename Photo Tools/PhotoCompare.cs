@@ -58,8 +58,12 @@ namespace Photo_Tools
                     {
                         Debug.Print($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
                         Console.WriteLine($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
-                    if (SecondPhoto.FileName == "Tower of London SIMILAR_TEST_VESRION_2.tif") 
-                    { Console.WriteLine("Errant Photo"); }
+
+                    //enable the next two lines and add a breakpoint if a check on a particular file is needed - change the file name string appropriately
+                    //if (SecondPhoto.FileName == "IMG_0404 BW EDIT_1.tiff") 
+                   // { Console.WriteLine("Errant Photo"); }
+
+
                     switch (SecondPhoto.Extension.ToLower())
                         {
                         case (".mov"):
@@ -83,8 +87,9 @@ namespace Photo_Tools
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageWidth.Substring(0, 4)) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageHeight.Substring(0, 4)) { counter++; }
-                                    if (SecondPhoto.isMonochrome == OriginalPhoto.isMonochrome) { counter++; }
-                                    if (SecondPhoto.DateLastModified == OriginalPhoto.DateLastModified) { counter++; }
+                                    if (SecondPhoto.Extension == OriginalPhoto.Extension) { counter+=2; }
+                                    if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter--; }
+                                    if (SecondPhoto.DateLastModified != OriginalPhoto.DateLastModified) { counter--; }
                                     //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
                                 }
                                 catch (Exception) //Generally thrown if the resulution is less that 1000x1000 pixels
