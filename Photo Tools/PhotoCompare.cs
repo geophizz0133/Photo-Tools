@@ -25,19 +25,30 @@ namespace Photo_Tools
         {
             string secondaryPhotosSQL = string.Empty;
             int counter = 0;
+
+            //Set the criteria for OriginalPhotos - Secondary Photos are dependent on the results of the SQL query and can't be set here
             switch (OriginalType)
             {
                 case ("RAW"):
-                    { 
+                    {
                         OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_ORIGINALS");
                         secondaryPhotosSQL = $"Select * from PhotoList where [FILE_NAME] not in(Select [DESIGNATED_ORIGINAL] from vw_DESIGNATED_ORIGINALS) AND [PHOTO_STATUS] is null";
                         Console.WriteLine($"PhotoCompare.Compare() - Original Photos Retrieved:{OriginalPhotos.Count}");
                         break;
-                     }
+                    }
+                case ("tif"):
+                    {
+                        OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_TIFF_PHOTOS");
+                        break;
+                    }
+                case ("dng"):
+                    {
+                        OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_DNG_PHOTOS");
+                        break;
+                    }
                 case ("jpg"): //Edited jpg
                     {
                         OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_jpg_COPIES");
-                        secondaryPhotosSQL = "";
                         break;
                     }
                 case ("png"):
@@ -50,25 +61,56 @@ namespace Photo_Tools
             {
                 Console.WriteLine($"PhotoCompare.Compare() - Checking {OriginalPhoto.FileName}:    ");
 
-               // SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB($"Select * from PhotoList where [FILE_PATH] not in(Select [DESIGNATED_ORIGINAL] from vw_DESIGNATED_ORIGINALS) AND [PHOTO_STATUS] is null");  //this pulls the rest of the images that have not been previously designated
+               switch (OriginalType)
+                {
+                    case ("RAW"):
+                        {
+                            //Use the default setting
+                            break;
+                        }
+                    case ("tif"):
+                        {
+                            string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [FILE_NAME] in ('" + OriginalPhoto.FilePath + "') AND [PHOTO_STATUS] is null";
+                            PhotoDBHandler.RunSQLCommand (updatePrimaryPhotoStatus);
+                            secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.tif','.tiff') and [FILE_NAME] not in('" + OriginalPhoto.FilePath + "') and [PHOTO_STATUS] not in ('PRIMARY_VERSION') and [DATE_LAST_MODIFIED] in ('" + OriginalPhoto.DateLastModified + "')"; 
+                            break;        
+                        }
+                    case ("dng"):
+                        {
+                            string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [ID] in ('" + OriginalPhoto.ID + "')";
+                            PhotoDBHandler.RunSQLCommand(updatePrimaryPhotoStatus);
+                            secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.dng','.DNG') and [ID] not in('" + OriginalPhoto.ID + "') and [PHOTO_STATUS] not in ('PRIMARY_VERSION') and [DATE_LAST_MODIFIED] in ('" + OriginalPhoto.DateLastModified + "')";
+                            break;
+
+                        }
+                }
+
                 SecondaryPhotos = PhotoDBHandler.GetListofPhotosFromDB(secondaryPhotosSQL);
-                //Console.WriteLine($"- {SecondaryPhotos.Count} Secondary Photos Retreieved");
+
+
+                //For each secondary type (tif, jpg, png) a special handler forjust those files is needed
+
 
                 foreach (PhotoData SecondPhoto in SecondaryPhotos)
                     {
                         Debug.Print($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
                         Console.WriteLine($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
 
-                    //enable the next two lines and add a breakpoint if a check on a particular file is needed - change the file name string appropriately
-                    //if (SecondPhoto.FileName == "IMG_0404 BW EDIT_1.tiff") 
-                   // { Console.WriteLine("Errant Photo"); }
+                    //enable the if block below and add a breakpoint if a check on a particular file is needed - change the file name string appropriately
+                    if (SecondPhoto.FileName == "CoffeeMaker_ORIGINAL.DNG")
+                    {
+                        Console.WriteLine("Errant Photo " + SecondPhoto.FileName + "Comparing to " + OriginalPhoto.FileName);
+                        Console.WriteLine();
+                    }
 
 
                     switch (SecondPhoto.Extension.ToLower())
                         {
-                        case (".mov"):
+                        case (".mov")://Ignore non-photo and video files
                         case (".mp4"):
-                            //Ignore video files
+                        case (".db"):
+                        case (".xmp"):
+                            
                             { break; }
                         case (".png"): //PNG files have little metadata so only the image height and width can be compared
                                 {
@@ -105,9 +147,12 @@ namespace Photo_Tools
                                 }
                                 break;
                                 }
-                                default: //All other file types
+                        default: //All other file types
                                 {
-                                
+                                if (SecondPhoto.FileName == "Suitcase_SIMILAR.jpg") 
+                                { Console.Write("Stop for a sec"); }
+
+
                                     if ((SecondPhoto.DateCaptured != OriginalPhoto.DateCaptured)) 
                                     { counter = 1;
                                     break; 
@@ -121,13 +166,14 @@ namespace Photo_Tools
                                     if (SecondPhoto.Extension == OriginalPhoto.Extension) { counter++; }
                                     if (SecondPhoto.ImageHeight == OriginalPhoto.ImageHeight) { counter++; }
                                     if (SecondPhoto.ImageWidth == OriginalPhoto.ImageWidth) { counter++; }
+                                    if (SecondPhoto.DateLastModified == OriginalPhoto.DateLastModified) { counter++; }
                                 //if (SecondPhoto.RGBHash == OriginalPhoto.RGBHash) { counter++; }
 
                                 //Criteria causing subtractions from the counter
-                                    if (SecondPhoto.DateLastModified != OriginalPhoto.DateLastModified) { counter--; }
+                                if (SecondPhoto.DateLastModified != OriginalPhoto.DateLastModified) { counter-=2; }
 
                                 //Criteria causing hard resets of the Duplicate score
-                                if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter = 1; }//If one is in Mono, it is a version
+                                    if (SecondPhoto.isMonochrome != OriginalPhoto.isMonochrome) { counter = 1; }//If one is in Mono, it is a version
                                     if (SecondPhoto.Software != OriginalPhoto.Software) { counter = 1; } //Different software with all else the same is always a version
                                     if (SecondPhoto.FilePath.ToUpper().Contains("VERSION")) {  counter = 1; } //The fact that it is a version is distinctly called out
                                     break;

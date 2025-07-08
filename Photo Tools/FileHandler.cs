@@ -10,7 +10,7 @@ namespace Photo_Tools
     {
         public void ExtractDuplicates(string folder) 
         { 
-        //Get a list of duplicate files from vw_ORIGINALS_AND_DUPLICATES and move those files to a different folder
+        //Get a list of duplicate files and move those files to a different folder
         
         // SQLite_Handler photoDBHandler = new SQLite_Handler();
 

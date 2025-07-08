@@ -7,28 +7,26 @@ namespace Photo_Tools
 {
     public class ImageHandler1 :IDisposable
     {
-        /// <summary>
-        /// Determines if the given image is monochrome (black and white).
-        /// This assumes that if R<>G and G<>B it is color
-        /// <param name="photoPath">The path to the image file.</param>
-        /// <returns>True if the image is monochrome, otherwise false.</returns>
+
         public bool IsMonochrome(string photoPath)
+        // Determines if the given image is monochrome (black and white).
+        // This assumes that if R<>G and G<>B it is color
+        // Parameter: <"photoPath">The path to the image file.
+        // Returns True if the image is monochrome, otherwise false.
         {
             bool isMonochrome = false;
             try
             {
                 //If the file is a RAW or Video file, it is always color and does not need to be checked
+                if (IsRAW(photoPath)) {return false;}
+
+                //This is error checking in case an XMP or DB file is passed in
                 int charIndex = 0;
-                charIndex = charIndex + photoPath.ToUpper().IndexOf("CR2");
-                charIndex = charIndex + photoPath.ToUpper().IndexOf("CR3");
-                charIndex = charIndex + photoPath.ToUpper().IndexOf("ARW");
-                charIndex = charIndex + photoPath.ToUpper().IndexOf("MOV");
-                charIndex = charIndex + photoPath.ToUpper().IndexOf("MP4");
-                charIndex = charIndex + photoPath.ToUpper().IndexOf("RW2");
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("XMP");
                 charIndex = charIndex + photoPath.ToUpper().IndexOf("DB");
 
                 if (charIndex > 0) { return false; }
+                
 
                 using (var image = Image.Load<Rgba32>(photoPath))
                 {
@@ -44,12 +42,13 @@ namespace Photo_Tools
 
                                 if (monoColorPixels == 100)
                                 {
-                                    return false;
+                                    return false;  //Break out of the loop immediately
                                 }
                             }
                         }
                     }
 
+                    //If the loop goes all the way through and doesn't find 100 color pixels\, doublecheck
                     if (monoColorPixels > 100) //If there are more than 100 color pixels it is not monochrome
                     {
                         isMonochrome = false;
@@ -63,11 +62,13 @@ namespace Photo_Tools
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"IsMonochrome - An error occurred: {ex.Message}");
+                //An error message of "At least one frame is expected" means the file is corrupted
+                //Console.WriteLine($"IsMonochrome - An error occurred: {ex.Message}");
                 return isMonochrome;
             }
         }
         public bool IsRAW(string photoPath) 
+            //Returns True if Photo is in a RAW format, otherwise False
             //Video files are counted as RAW to exlude them from processing because they have funky metadata that screws things up
         {
             
@@ -80,7 +81,7 @@ namespace Photo_Tools
             charIndex = charIndex + photoPath.ToUpper().IndexOf("MOV");
             charIndex = charIndex + photoPath.ToUpper().IndexOf("MP4");
             charIndex = charIndex + photoPath.ToUpper().IndexOf("RW2");
-            charIndex = charIndex + photoPath.ToUpper().IndexOf("XMP");
+            //charIndex = charIndex + photoPath.ToUpper().IndexOf("XMP");
 
             if (charIndex > 0) { return true; }
             return false;

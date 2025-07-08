@@ -160,7 +160,7 @@ namespace Photo_Tools
                         subjectPhoto.CameraMake = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_CAMERA_MAKE"));
                         subjectPhoto.CameraModel = photoDbReader.GetString(photoDbReader.GetOrdinal("EXIF_CAMERA_MODEL"));
                         subjectPhoto.FilePrefix = photoDbReader.GetString(photoDbReader.GetOrdinal("FILE_PREFIX"));
-                        subjectPhoto.isMonochrome = photoDbReader.GetBoolean(photoDbReader.GetOrdinal("PHOTO_IS_MONOCHROME"));
+                        subjectPhoto.isMonochrome = Convert.ToBoolean(photoDbReader.GetString(photoDbReader.GetOrdinal("PHOTO_IS_MONOCHROME")));
                         subjectPhoto.isRaw = photoDbReader.GetBoolean(photoDbReader.GetOrdinal("PHOTO_IS_RAW"));
                         //subjectPhoto.RGBHash = photoDbReader.GetString(photoDbReader.GetOrdinal("PHOTO_RGB_HASH"));
 
@@ -224,8 +224,7 @@ namespace Photo_Tools
                 RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in ('.jpg','.JPG') and [PHOTO_IS_RAW] = 'False' AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null)");
                 RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION', [DUPLICATE_SCORE] = 1 Where INSTR([FILE_PATH],'Version')>0");
-
-
+                RunSQLCommand("Update [PhotoList]Set [PHOTO_STATUS] = 'POSSIBLY CORRUPT' Where [FILE_EXT] = '.tiff' AND [EXIF_CAMERA_MAKE]= '' AND [EXIF_WIDTH] = '' AND [EXIF_HEIGHT] = ''");
             }
             catch (Exception e)
             {
@@ -233,16 +232,6 @@ namespace Photo_Tools
                 throw;
             }
 
-        }
-        public void FixJPGOriginals() //Post Processing Corrections
-        {
-            //NOTE FOR LATER - This may no longer be needed as JPG Originals are designated in FixLowHangingFruit
-
-            //Console.WriteLine($"Applying Post Processing Corrections");
-            //RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [JPG_ORIGINAL] from vw_ORIGINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
-            //RunSQLCommand("UPDATE PhotoList Set [DUPLICATE_SCORE] = 1, [PHOTO_STATUS]='VERSION' Where [FILE_PATH] in (SELECT [DESIGNATED_ORIGINAL] from vw_OrIgINAL_JPG_PAIRS where INSTR([DESIGNATED_ORIGINAL],'.png')>0)");
-            //RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' Where [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
-            //RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 1,[PHOTO_STATUS]='VERSION' Where [EXIF_SOFTWARE] in (Select [SOFTWARE] from SOFTWARE_LOOKUP)");
         }
     }
 }

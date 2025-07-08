@@ -60,6 +60,8 @@ try
 
 
     DirectoryInfo FileFolder = new DirectoryInfo(@"D://Scratch//PhotoTools Samples//PhotoSampleData");
+    //DirectoryInfo FileFolder = new DirectoryInfo(@"D://Scratch//PhotoTools Samples//BigSample");
+
     Console.WriteLine("Starting folder scan:");
     int fileLocation = 0;
     int fileCount = FileFolder.EnumerateFileSystemInfos().Count();
@@ -85,7 +87,7 @@ try
         }
         catch (Exception)
         {
-            Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
+            //Console.WriteLine($"File type undetermined, skipping: {filename.FullName.ToString()}");
             fileLocation++;
         }
         dbTester.Dispose();
@@ -103,13 +105,20 @@ try
     Console.WriteLine("Retrieving Originals");
     
     //Find the Versions and Duplicates
-    Console.WriteLine("Starting Photo Comparison");
+    Console.WriteLine("Starting RAW Photo Comparison");
     PhotoCompare RunCompare = new PhotoCompare();
     RunCompare.Compare();
-    Console.WriteLine("Comparison Done");
+    Console.WriteLine("RAW Comparison Done");
+
+    Console.WriteLine("Starting tiff Photo Comparison");
+    RunCompare.Compare("tif");
+    Console.WriteLine("tiff Comparison Done");
+
+  //  Console.WriteLine("Starting dng Photo Comparison");
+  //  RunCompare.Compare("dng");
+  //  Console.WriteLine("dng Comparison Done");
 
     Console.WriteLine("Applying Post Processing Corrections");
-    dbTester.FixJPGOriginals();
 
     Console.WriteLine($"DONE - Press any key to quit");Console.Read();
     
