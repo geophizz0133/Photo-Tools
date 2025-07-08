@@ -224,7 +224,7 @@ namespace Photo_Tools
                 RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in ('.jpg','.JPG') and [PHOTO_IS_RAW] = 'False' AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null)");
                 RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION', [DUPLICATE_SCORE] = 1 Where INSTR([FILE_PATH],'Version')>0");
-                RunSQLCommand("Update [PhotoList]Set [PHOTO_STATUS] = 'POSSIBLY CORRUPT' Where [FILE_EXT] = '.tiff' AND [EXIF_CAMERA_MAKE]= '' AND [EXIF_WIDTH] = '' AND [EXIF_HEIGHT] = ''");
+                RunSQLCommand("UPDATE [PhotoList] SET[PHOTO_STATUS] = 'POSSIBLY CORRUPT' Where [FILE_EXT] = '.tiff' AND [EXIF_CAMERA_MAKE]= '' AND [EXIF_WIDTH] = '' AND [EXIF_HEIGHT] = ''");
             }
             catch (Exception e)
             {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Photo_Tools
 {
-    internal class FileHandler
+    internal class DuplicateHandler
     {
         public void ExtractDuplicates(string folder) 
         { 

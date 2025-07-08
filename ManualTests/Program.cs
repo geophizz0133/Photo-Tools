@@ -46,14 +46,10 @@ try
 	Console.WriteLine("Connecting with specific location and SQL Code - Works");
 
   
-
-    
     //Clear the PhotoList table
     Console.WriteLine("Clearing the database");
     dbTester.RunSQLCommand("delete from PhotoList");
-
-
-    
+  
     List<PhotoData> photoData = new List<PhotoData>();
 
     Console.WriteLine("Cataloging Photos");
@@ -98,7 +94,7 @@ try
   
   
 
-    //Update the file prefix field in the DB (It is faster than doing it in c#)
+    //Update several fields in the DB (It is faster than doing it in c#)
     Console.WriteLine("Applying Pre Processing Corrections");
     dbTester.UpdateLowHangingFruit();
 
@@ -118,7 +114,6 @@ try
   //  RunCompare.Compare("dng");
   //  Console.WriteLine("dng Comparison Done");
 
-    Console.WriteLine("Applying Post Processing Corrections");
 
     Console.WriteLine($"DONE - Press any key to quit");Console.Read();
     
