@@ -26,6 +26,7 @@ namespace Photo_Tools
             string secondaryPhotosSQL = string.Empty;
             int counter = 0;
 
+            DuplicateHandler duplicateHandler = new DuplicateHandler();
             //Set the criteria for OriginalPhotos - Secondary Photos are dependent on the results of the SQL query and can't be set here
             switch (OriginalType)
             {
@@ -44,11 +45,13 @@ namespace Photo_Tools
                 case ("dng"):
                     {
                         OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_DNG_PHOTOS");
+                        duplicateHandler.ExtractDuplicates("dng");
                         break;
                     }
                 case ("jpg"): //Edited jpg
                     {
-                        OriginalPhotos = PhotoDBHandler.GetListofPhotosFromDB($"SELECT * from vw_ALL_jpg_COPIES");
+                        Console.WriteLine("Finding Duplicate JPG Files");
+                        duplicateHandler.ExtractDuplicates("JPG");
                         break;
                     }
                 case ("png"):
@@ -77,9 +80,12 @@ namespace Photo_Tools
                         }
                     case ("dng"):
                         {
-                            string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [ID] in ('" + OriginalPhoto.ID + "')";
-                            PhotoDBHandler.RunSQLCommand(updatePrimaryPhotoStatus);
-                            secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.dng','.DNG') and [ID] not in('" + OriginalPhoto.ID + "') and [PHOTO_STATUS] not in ('PRIMARY_VERSION') and [DATE_LAST_MODIFIED] in ('" + OriginalPhoto.DateLastModified + "')";
+                            //Do Nothing. Everything for DNG files is handled by DuplicateHandler.ExtractDuplicates
+
+                            //string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [PHOTO_STATUS] is null AND [ID] in ('" + OriginalPhoto.ID + "')";
+                            //string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 0 where [ID] not in ('" + OriginalPhoto.ID + "')";
+                            //PhotoDBHandler.RunSQLCommand(updatePrimaryPhotoStatus);
+                            //secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.dng','.DNG') and [ID] not in('" + OriginalPhoto.ID + "') and [PHOTO_STATUS] not in ('PRIMARY_VERSION') and [DATE_LAST_MODIFIED] not in ('" + OriginalPhoto.DateLastModified + "')";
                             break;
 
                         }
@@ -97,11 +103,11 @@ namespace Photo_Tools
                         Console.WriteLine($"Checking photo set {OriginalPhoto.FileName} / {SecondPhoto.FileName}");
 
                     //enable the if block below and add a breakpoint if a check on a particular file is needed - change the file name string appropriately
-                    if (SecondPhoto.FileName == "CoffeeMaker_ORIGINAL.DNG")
-                    {
-                        Console.WriteLine("Errant Photo " + SecondPhoto.FileName + "Comparing to " + OriginalPhoto.FileName);
-                        Console.WriteLine();
-                    }
+                 //   if (SecondPhoto.FileName == "CoffeeMaker_ORIGINAL.DNG")
+                 //   {
+                 //       Console.WriteLine("Errant Photo " + SecondPhoto.FileName + "Comparing to " + OriginalPhoto.FileName);
+                 //       Console.WriteLine();
+                 //   }
 
 
                     switch (SecondPhoto.Extension.ToLower())
@@ -149,11 +155,7 @@ namespace Photo_Tools
                                 }
                         default: //All other file types
                                 {
-                                if (SecondPhoto.FileName == "Suitcase_SIMILAR.jpg") 
-                                { Console.Write("Stop for a sec"); }
-
-
-                                    if ((SecondPhoto.DateCaptured != OriginalPhoto.DateCaptured)) 
+                                if ((SecondPhoto.DateCaptured != OriginalPhoto.DateCaptured)) 
                                     { counter = 1;
                                     break; 
                                     } //The photos are unrelated
@@ -183,7 +185,7 @@ namespace Photo_Tools
                         switch (counter)
                         {
                             case (0):
-                                { SecondPhoto.PhotoStatus = "ORIGINAL"; break; } //Whoah man, this should never happen here
+                                { SecondPhoto.PhotoStatus = "ORIGINAL"; break; } 
                             case (1):
                             case (2):
                             case (3):

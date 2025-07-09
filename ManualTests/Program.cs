@@ -110,9 +110,13 @@ try
     RunCompare.Compare("tif");
     Console.WriteLine("tiff Comparison Done");
 
-  //  Console.WriteLine("Starting dng Photo Comparison");
-  //  RunCompare.Compare("dng");
-  //  Console.WriteLine("dng Comparison Done");
+    Console.WriteLine("Starting jpg Photo Comparison");
+    RunCompare.Compare("jpg");
+    Console.WriteLine("jpg Comparison Done");
+
+    Console.WriteLine("Starting DNG Photo Comparison");
+    RunCompare.Compare("dng");
+    Console.WriteLine("DNG Comparison Done");
 
 
     Console.WriteLine($"DONE - Press any key to quit");Console.Read();
