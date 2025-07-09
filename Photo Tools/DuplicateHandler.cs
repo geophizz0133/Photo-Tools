@@ -29,8 +29,11 @@ namespace Photo_Tools
                 switch(fileExt)
                 {
                     case ("dng"):
-                        {
-                            PhotoDB_Handler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 6 WHERE ID not in ('" + photo.ID.ToString() + "') AND[FILE_EXT] in ('." + fileExt.ToUpper() + "') AND[DATE_LAST_MODIFIED] in ('" + photo.DateLastModified + "')");
+                        {   //Update the first photo as ORIGINAL
+                            photo.PhotoStatus = "ORIGINAL";
+                            photo.DuplicateScore = 0;
+                            PhotoDB_Handler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 Where [ID] in ('"+ photo.ID +"')");
+                            PhotoDB_Handler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 6 WHERE ID not in ('" + photo.ID.ToString() + "') AND [DUPLICATE_SCORE] = 0 AND [FILE_EXT] in ('." + fileExt.ToUpper() + "') AND [DATE_LAST_MODIFIED] in ('" + photo.DateLastModified + "')");
                             SQLQuery = "SELECT * from PhotoList WHERE ID not in ('" + photo.ID.ToString() + "') AND [FILE_EXT] in ('." + fileExt.ToUpper() + "') AND [DUPLICATE_SCORE] > 0 AND [EXIF_DATE_CAPTURED] in ('" + photo.DateCaptured + "')";
                             break;
 
@@ -39,6 +42,11 @@ namespace Photo_Tools
                     default:
                         {
                             SQLQuery = "SELECT * from PhotoList WHERE ID not in ('" + photo.ID.ToString() + "') AND [FILE_EXT] in ('." + fileExt.ToLower() + "') AND [EXIF_DATE_CAPTURED] in ('" + photo.DateCaptured + "')";
+                            break;
+                        }
+                    case ("tif"): 
+                        {
+
                             break;
                         }
 
@@ -54,6 +62,7 @@ namespace Photo_Tools
 
                         counter = 0;
                         if (photo.DateLastModified == photoCopy.DateLastModified) { counter += 2; } else { counter = 0; }
+                        if (photo.PhotoStatus == photoCopy.PhotoStatus) { counter++; }
                         if (photo.isMonochrome == photoCopy.isMonochrome) { counter++; }
                         if (photo.ImageHeight == photoCopy.ImageHeight) { counter++; }
                         if (photo.ImageWidth == photoCopy.ImageWidth) { counter++; }
