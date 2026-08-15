@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -23,8 +23,12 @@ namespace Photo_Tools
 
         public SqliteConnection DBConnection { get; set; }
 
-        public SQLite_Handler(string dbLocation = $"D:/Scratch/PhotoTools.db", string SQLscript = $"D:/Scratch/CREATE TABLE PhotoList .txt")
+        public SQLite_Handler(string dbLocation = null, string SQLscript = null)
         {
+            var cfg = AppConfig.Load();
+            dbLocation ??= cfg.DbLocation;
+            SQLscript ??= cfg.SqlScript;
+
             try
             {
                 DBConnection = GetSqliteConnection(dbLocation);
@@ -42,7 +46,7 @@ namespace Photo_Tools
 
         public SqliteConnection GetSqliteConnection(string DBLocation) //I don't think this is used
         {
-            SqliteConnection dbConn = new SqliteConnection("Data Source =" + DBLocation);
+            SqliteConnection dbConn = new SqliteConnection("Data Source=" + DBLocation);
             {
                 return dbConn;
             }
@@ -84,33 +88,38 @@ namespace Photo_Tools
         public void InsertSinglePhoto(PhotoData photoData)
         {
             //Insert a single PhotoData object into the database
-            using (DBConnection)
+            var sql = @"INSERT INTO PhotoList(
+                ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_CAMERA_MODEL,
+                EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_EXPOSURE_TIME, EXIF_SOFTWARE, FILE_SIZE, EXIF_HEIGHT, EXIF_WIDTH,
+                DATE_LAST_MODIFIED, PHOTO_IS_MONOCHROME, PHOTO_IS_RAW, FILE_PREFIX)
+                VALUES (
+                @ID, @FILE_PATH, @FILE_NAME, @FILE_EXT, @EXIF_DATE_CAPTURED, @EXIF_CAMERA_MAKE, @EXIF_CAMERA_MODEL,
+                @EXIF_FOCAL_LENGTH, @EXIF_F_STOP, @EXIF_EXPOSURE_TIME, @EXIF_SOFTWARE, @FILE_SIZE, @EXIF_HEIGHT, @EXIF_WIDTH,
+                @DATE_LAST_MODIFIED, @PHOTO_IS_MONOCHROME, @PHOTO_IS_RAW, @FILE_PREFIX)";
+
+            var parameters = new Dictionary<string, object?>
             {
-                SqliteCommand InsertCommand = new SqliteCommand();
-                try
-                {
-                    InsertCommand.Connection = DBConnection;
-                    InsertCommand.CommandText = ($"INSERT INTO PhotoList(ID, FILE_PATH, FILE_NAME, FILE_EXT, EXIF_DATE_CAPTURED, EXIF_CAMERA_MAKE, EXIF_CAMERA_MODEL, EXIF_FOCAL_LENGTH, EXIF_F_STOP, EXIF_SHUTTER_SPEED,EXIF_SOFTWARE,FILE_SIZE, EXIF_WIDTH, EXIF_HEIGHT, EXIF_FULL_IMAGE_SIZE,DATE_LAST_MODIFIED,PHOTO_IS_MONOCHROME,PHOTO_IS_RAW) VALUES( \"{photoData.ID.ToString()}\",\"{photoData.FileName}\",\"{photoData.FilePath}\",\"{photoData.Extension}\",\"{photoData.DateCaptured}\",\"{photoData.CameraMake}\",\"{photoData.CameraModel}\",\"{photoData.FocalLength}\",\"{photoData.fStop}\",\"{photoData.ShutterSpeed}\",\"{photoData.Software}\",\"{photoData.FileSize}\",\"{photoData.ImageHeight}\",\"{photoData.ImageWidth}\",\"{photoData.FullImageSize}\",\"{photoData.DateLastModified}\",\"{photoData.isMonochrome}\",\"{photoData.isRaw}\")");
-                    Debug.Print(InsertCommand.CommandText);
+                ["@ID"] = photoData.ID,
+                ["@FILE_PATH"] = photoData.FilePath,
+                ["@FILE_NAME"] = photoData.FileName,
+                ["@FILE_EXT"] = photoData.Extension,
+                ["@EXIF_DATE_CAPTURED"] = photoData.DateCaptured,
+                ["@EXIF_CAMERA_MAKE"] = photoData.CameraMake,
+                ["@EXIF_CAMERA_MODEL"] = photoData.CameraModel,
+                ["@EXIF_FOCAL_LENGTH"] = photoData.FocalLength,
+                ["@EXIF_F_STOP"] = photoData.fStop,
+                ["@EXIF_EXPOSURE_TIME"] = photoData.ShutterSpeed,
+                ["@EXIF_SOFTWARE"] = photoData.Software,
+                ["@FILE_SIZE"] = photoData.FileSize,
+                ["@EXIF_HEIGHT"] = photoData.ImageHeight,
+                ["@EXIF_WIDTH"] = photoData.ImageWidth,
+                ["@DATE_LAST_MODIFIED"] = photoData.DateLastModified,
+                ["@PHOTO_IS_MONOCHROME"] = photoData.isMonochrome,
+                ["@PHOTO_IS_RAW"] = photoData.isRaw,
+                ["@FILE_PREFIX"] = photoData.FilePrefix
+            };
 
-                    try
-                    {
-                        DBConnection.Open();
-                        InsertCommand.ExecuteNonQuery();
-                        DBConnection.Close();
-                    }
-                    catch (Exception)
-                    {
-
-                        Debug.Print($"Database Insert Failed for {InsertCommand.CommandText}");
-                    }
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-            }
+            RunSQLCommand(sql, parameters);
         }
 
 
@@ -181,33 +190,40 @@ namespace Photo_Tools
 
 
 
-
         public void ExtractDuplicates(List<PhotoData> list, string FolderLocation)
         {
             //Take the list of duplicates and move them to a duplicates folder structure
 
         }
 
+        // Keep the old single-argument RunSQLCommand for callers that didn't change
         public void RunSQLCommand(string CommandToRun)
+        {
+            RunSQLCommand(CommandToRun, null);
+        }
+
+        // New overload that accepts parameters
+        public void RunSQLCommand(string CommandToRun, Dictionary<string, object>? parameters = null)
         {
             using (DBConnection)
             {
-                SqliteCommand InsertCommand = new SqliteCommand();
-
-                InsertCommand.Connection = DBConnection;
-                InsertCommand.CommandText = (CommandToRun);
-                Debug.Print(InsertCommand.CommandText);
-
+                using var cmd = new SqliteCommand(CommandToRun, DBConnection);
+                if (parameters != null)
+                {
+                    foreach (var p in parameters)
+                    {
+                        cmd.Parameters.AddWithValue(p.Key, p.Value ?? DBNull.Value);
+                    }
+                }
                 try
                 {
                     DBConnection.Open();
-
-                    InsertCommand.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery();
                     DBConnection.Close();
                 }
                 catch (Exception e)
                 {
-                    Debug.Print($"Database Operatrion Failed for {InsertCommand.CommandText}" + Environment.NewLine + $"Reason: {e.Message}/{e.InnerException}");
+                    Debug.Print($"Database Operatrion Failed for {CommandToRun}" + Environment.NewLine + $"Reason: {e.Message}/{e.InnerException}");
                     throw;
                 }
             }
@@ -221,10 +237,10 @@ namespace Photo_Tools
                 RunSQLCommand("UPDATE PhotoList SET [FILE_PREFIX] = substring([FILE_PATH],0,9)");
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL',[DUPLICATE_SCORE] = 0 WHERE [PHOTO_IS_RAW] = 'True'");
                 RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'JPG ORIGINAL',[DUPLICATE_SCORE] = 0 WHERE [FILE_EXT] = '.JPG'");
-                RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select [DESIGNATED_ORIGINAL] from vw_DISTINCT_JPG_ORIGINALS)");
-                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in ('.jpg','.JPG') and [PHOTO_IS_RAW] = 'False' AND ([PHOTO_STATUS] is null or [DUPLICATE_SCORE] is null)");
+                RunSQLCommand("UPDATE PhotoList SET [DUPLICATE_SCORE] = 0, [PHOTO_STATUS] = 'ORIGINAL' WHERE [FILE_EXT] in ('.JPG') and [PHOTO_STATUS] is null  and [FILE_PATH] in (Select [DESIGNA[...]");
+                RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 4 Where [FILE_EXT] in ('.jpg','.JPG') and [PHOTO_IS_RAW] = 'False' AND ([PHOTO_STATUS] is nul[...");
                 RunSQLCommand("UPDATE PhotoList SET[PHOTO_STATUS] = 'VERSION', [DUPLICATE_SCORE] = 1 Where INSTR([FILE_PATH],'Version')>0");
-                RunSQLCommand("UPDATE [PhotoList] SET[PHOTO_STATUS] = 'POSSIBLY CORRUPT' Where [FILE_EXT] = '.tiff' AND [EXIF_CAMERA_MAKE]= '' AND [EXIF_WIDTH] = '' AND [EXIF_HEIGHT] = ''");
+                RunSQLCommand("UPDATE [PhotoList] SET[PHOTO_STATUS] = 'POSSIBLY CORRUPT' Where [FILE_EXT] = '.tiff' AND [EXIF_CAMERA_MAKE]= '' AND [EXIF_WIDTH] = '' AND [EXIF_HEIGHT] = '");
             }
             catch (Exception e)
             {

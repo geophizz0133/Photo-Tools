@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using XmpCore.Impl;
 using XmpCore.Options;
 using XmpCore;
+using System.IO;
 
 namespace Photo_Tools
 {
@@ -24,7 +25,7 @@ namespace Photo_Tools
                 var xmpMeta = new XmpMeta();
                 xmpMeta.SetProperty(XmpConstants.NsDC, property, value);
 
-                using (var writer = new StreamWriter(filePath))
+                using (var writer = new StreamWriter(filePath, false))
                 {
                     XmpMetaFactory.Serialize(xmpMeta, writer.BaseStream, new SerializeOptions());
                 }
@@ -53,18 +54,13 @@ namespace Photo_Tools
                 }
             }
 
-            public void UpdateXmpData(string filePath, string property, string newValue)
-            {
-                UpdateXmpData(filePath, property, newValue);
-            }
-
             /// <summary>
             /// Updates XMP data in a sidecar file.
             /// </summary>
             /// <param name="filePath">The path to the XMP sidecar file.</param>
             /// <param name="property">The XMP property to update.</param>
             /// <param name="newValue">The new value of the XMP property.</param>
-            public void UpdateXmpData(string filePath, string property, string newValue, StreamWriter writer)
+            public void UpdateXmpData(string filePath, string property, string newValue)
             {
                 try
                 {
@@ -76,18 +72,16 @@ namespace Photo_Tools
 
                     xmpMeta.SetProperty(XmpConstants.NsDC, property, newValue);
 
-                    using (var rdfWriter = new StreamWriter(filePath))
+                    using (var rdfWriter = new StreamWriter(filePath, false)) // overwrite
                     {
-                        //Stream rdfStream = rdfWriter.Write(rdfWriter.ToString());   
                         XmpMetaFactory.Serialize(xmpMeta, rdfWriter.BaseStream, new SerializeOptions());
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error updating XMP data: {ex.Message}");
+                    throw;
                 }
             }
         }
     }
-
-

@@ -1,4 +1,4 @@
-﻿using Photo_Tools;
+using Photo_Tools;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Data.Sqlite;
@@ -6,43 +6,12 @@ using Microsoft.Data.Sqlite;
 Console.Clear();
 Console.WriteLine("Starting Tests");
 
-
-/*
-// Path to your image file and sidecar file
-string imagePath = "path/to/your/photo.jpg";
-string sidecarPath = "path/to/your/photo.xmp";
-
-// Create an instance of XmpHandler
-XmpHandler xmpHandler = new XmpHandler();
-
-// Write XMP data
-xmpHandler.WriteXmpData(sidecarPath, "dc:title", "My Photo Title");
-
-// Read XMP data
-string title = xmpHandler.ReadXmpData(sidecarPath, "dc:title");
-Console.WriteLine($"Title: {title}");
-
-// Update XMP data
-xmpHandler.UpdateXmpData(sidecarPath, "dc:title", "Updated Photo Title");
-
-// Read XMP data again to confirm update
-title = xmpHandler.ReadXmpData(sidecarPath, "dc:title");
-Console.WriteLine($"Updated Title: {title}");
-*/
-/*
-XMPHandler xmpHandler = new XMPHandler();
-string filePath = (@"D://Scratch//PhotoTools Samples//PhotoSampleData//DSC00003-19643.xmp");
-FileInfo fileInfo = new FileInfo(filePath);
-string XMPData = xmpHandler.ReadXmpData(filePath, "tiff:Make");
-Console.WriteLine(XMPData);
-Console.Write($"Stop Here"); Console.Read();
-
-*/
+var cfg = Photo_Tools.AppConfig.Load();
 
 try
 {
 //Establish database connection or create the DB if it doesn't exist
-	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler($"D:/Scratch/PhotoTools.db", $"D:/Scratch/Create_PhotoTools DB.sql");
+	Photo_Tools.SQLite_Handler dbTester = new SQLite_Handler(cfg.DbLocation, cfg.SqlScript);
 	Console.WriteLine("Connecting with specific location and SQL Code - Works");
 
   
@@ -55,7 +24,7 @@ try
     Console.WriteLine("Cataloging Photos");
 
 
-    DirectoryInfo FileFolder = new DirectoryInfo(@"D://Scratch//PhotoTools Samples//PhotoSampleData");
+    DirectoryInfo FileFolder = new DirectoryInfo(cfg.SampleDataPath);
     //DirectoryInfo FileFolder = new DirectoryInfo(@"D://Scratch//PhotoTools Samples//BigSample");
 
     Console.WriteLine("Starting folder scan:");
@@ -93,7 +62,6 @@ try
 
   
   
-
     //Update several fields in the DB (It is faster than doing it in c#)
     Console.WriteLine("Applying Pre Processing Corrections");
     dbTester.UpdateLowHangingFruit();
@@ -129,5 +97,3 @@ catch (Exception)
     Console.WriteLine("Connecting with specific location and SQL Code - FAILED");
     throw;
 }
-
-

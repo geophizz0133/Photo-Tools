@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -32,9 +32,9 @@ namespace Photo_Tools
                         {   //Update the first photo as ORIGINAL
                             photo.PhotoStatus = "ORIGINAL";
                             photo.DuplicateScore = 0;
-                            PhotoDB_Handler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 Where [ID] in ('"+ photo.ID +"')");
-                            PhotoDB_Handler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 6 WHERE ID not in ('" + photo.ID.ToString() + "') AND [DUPLICATE_SCORE] = 0 AND [FILE_EXT] in ('." + fileExt.ToUpper() + "') AND [DATE_LAST_MODIFIED] in ('" + photo.DateLastModified + "')");
-                            SQLQuery = "SELECT * from PhotoList WHERE ID not in ('" + photo.ID.ToString() + "') AND [FILE_EXT] in ('." + fileExt.ToUpper() + "') AND [DUPLICATE_SCORE] > 0 AND [EXIF_DATE_CAPTURED] in ('" + photo.DateCaptured + "')";
+                            PhotoDB_Handler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'ORIGINAL', [DUPLICATE_SCORE] = 0 Where [ID] = @id", new Dictionary<string, object>{{"@id", photo.ID}});
+                            PhotoDB_Handler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 6 WHERE ID != @id ", new Dictionary<string, object>{{"@id", photo.ID}});
+                            SQLQuery = "SELECT * from PhotoList WHERE ID not in ('" + photo.ID.ToString() + "') AND [FILE_EXT] in ('." + fileExt.ToUpper() + "') AND [DUPLICATE_SCORE] > 0 AND [EXIF[...]";
                             break;
 
                         }
@@ -44,7 +44,7 @@ namespace Photo_Tools
                             SQLQuery = "SELECT * from PhotoList WHERE ID not in ('" + photo.ID.ToString() + "') AND [FILE_EXT] in ('." + fileExt.ToLower() + "') AND [EXIF_DATE_CAPTURED] in ('" + photo.DateCaptured + "')";
                             break;
                         }
-                    case ("tif"): 
+                    case ("tif"):
                         {
 
                             break;
@@ -52,7 +52,7 @@ namespace Photo_Tools
 
                 }
 
-                //Photos2 = PhotoDB_Handler.GetListofPhotosFromDB("SELECT * from PhotoList WHERE ID not in (" + photo.ID.ToString() + " AND [FILE_EXT] in ('"  [EXIF_DATE_TAKEN] in (" + photo.DateCaptured + ")");
+                //Photos2 = PhotoDB_Handler.GetListofPhotosFromDB("SELECT * from PhotoList WHERE ID not in (" + photo.ID.ToString() + " AND [FILE_EXT] in ('"  [EXIF_DATE_TAKEN] in (" + photo.DateC[...]")
                 Photos2 = PhotoDB_Handler.GetListofPhotosFromDB(SQLQuery);
                 if (Photos2.Count > 0)
                 {

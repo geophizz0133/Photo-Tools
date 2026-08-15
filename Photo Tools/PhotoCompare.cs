@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -73,19 +73,19 @@ namespace Photo_Tools
                         }
                     case ("tif"):
                         {
-                            string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [FILE_NAME] in ('" + OriginalPhoto.FilePath + "') AND [PHOTO_STATUS] is null";
+                            string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [FILE_NAME] in ('" + OriginalPhoto.FilePath + "'[...]");
                             PhotoDBHandler.RunSQLCommand (updatePrimaryPhotoStatus);
-                            secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.tif','.tiff') and [FILE_NAME] not in('" + OriginalPhoto.FilePath + "') and [PHOTO_STATUS] not in ('PRIMARY_VERSION') and [DATE_LAST_MODIFIED] in ('" + OriginalPhoto.DateLastModified + "')"; 
+                            secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.tif','.tiff') and [FILE_NAME] not in('" + OriginalPhoto.FilePath + "') and [PHOTO_STATUS] not in ('[...]");
                             break;        
                         }
                     case ("dng"):
                         {
                             //Do Nothing. Everything for DNG files is handled by DuplicateHandler.ExtractDuplicates
 
-                            //string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [PHOTO_STATUS] is null AND [ID] in ('" + OriginalPhoto.ID + "')";
+                            //string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'PRIMARY_VERSION', [DUPLICATE_SCORE] = 0 where [PHOTO_STATUS] is null AND [ID] in ('" + Origi[...]");
                             //string updatePrimaryPhotoStatus = "Update PhotoList set [PHOTO_STATUS] = 'DUPLICATE', [DUPLICATE_SCORE] = 0 where [ID] not in ('" + OriginalPhoto.ID + "')";
                             //PhotoDBHandler.RunSQLCommand(updatePrimaryPhotoStatus);
-                            //secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.dng','.DNG') and [ID] not in('" + OriginalPhoto.ID + "') and [PHOTO_STATUS] not in ('PRIMARY_VERSION') and [DATE_LAST_MODIFIED] not in ('" + OriginalPhoto.DateLastModified + "')";
+                            //secondaryPhotosSQL = "Select * from PhotoList where [FILE_EXT] in ('.dng','.DNG') and [ID] not in('" + OriginalPhoto.ID + "') and [PHOTO_STATUS] not in ('PRIMARY_VERS[...]");
                             break;
 
                         }
@@ -124,7 +124,7 @@ namespace Photo_Tools
                                     counter = 3;
 
                                     //Skip MOV screenshots
-                                    if(OriginalPhoto.Extension.ToLower() == ".mov" && SecondPhoto.Extension.ToLower() == ".png"){ break; } //Skip it because it is a png screenshot of an mov and width/height of the .mov can't be evaluated
+                                    if(OriginalPhoto.Extension.ToLower() == ".mov" && SecondPhoto.Extension.ToLower() == ".png"){ break; } //Skip it because it is a png screenshot of an mov and w[...]
                                     
                                 
                                 //If the height and width do not match the original, it is a version
@@ -194,7 +194,13 @@ namespace Photo_Tools
                                 { SecondPhoto.PhotoStatus = "DUPLICATE"; break; }
                         }
                         Debug.Print($"PhotoCompare.Compare() - Updating {SecondPhoto.FileName} to {SecondPhoto.PhotoStatus}");
-                        PhotoDBHandler.RunSQLCommand($"UPDATE PhotoList SET [PHOTO_STATUS] = '{SecondPhoto.PhotoStatus}',[DUPLICATE_SCORE] = {SecondPhoto.DuplicateScore} WHERE [ID] = '{SecondPhoto.ID}'");
+                        // Use parameterized update to avoid SQL concatenation
+                        PhotoDBHandler.RunSQLCommand("UPDATE PhotoList SET [PHOTO_STATUS] = @status, [DUPLICATE_SCORE] = @score WHERE [ID] = @id",
+                            new Dictionary<string, object> {
+                                {"@status", SecondPhoto.PhotoStatus},
+                                {"@score", SecondPhoto.DuplicateScore},
+                                {"@id", SecondPhoto.ID}
+                            });
                         
                     }
                 PhotoDBHandler.Dispose();                
